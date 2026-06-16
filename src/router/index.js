@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeScreen from '../modules/home/Screen.vue'
+import MediaPlayerScreen from '../modules/media-player/Screen.vue'
 import ProxyScreen from '../modules/proxy/Screen.vue'
 
 const router = createRouter({
@@ -7,8 +7,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeScreen
+      name: 'media-player',
+      component: MediaPlayerScreen
     },
     {
       path: '/proxy',

@@ -12,9 +12,9 @@
       </button>
 
       <div class="sidebar-menu">
-        <router-link to="/" class="menu-item" v-tooltip.right="isCollapsed ? 'Home' : ''" active-class="active">
-          <i class="pi pi-home menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Home</span>
+        <router-link to="/" class="menu-item" v-tooltip.right="isCollapsed ? 'Media Player' : ''" active-class="active">
+          <i class="pi pi-video menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Media Player</span>
         </router-link>
         
         <router-link to="/proxy" class="menu-item" v-tooltip.right="isCollapsed ? 'Proxy List' : ''" active-class="active">

@@ -1,7 +1,7 @@
 <template>
   <div class="screen-container">
     <div class="header-actions">
-      <h1>Home Page</h1>
+      <h1>Media Player</h1>
       <Button label="Create New Media Player" icon="pi pi-plus" @click="isModalVisible = true" />
     </div>
 
@@ -44,7 +44,7 @@
 
       <template #footer>
         <Button label="Cancel" text severity="secondary" @click="isModalVisible = false" autofocus />
-        <Button label="Create Media Player" @click="startPlayer" />
+        <Button label="Create" @click="startPlayer" />
       </template>
     </Dialog>
   </div>
