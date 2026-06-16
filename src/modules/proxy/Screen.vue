@@ -70,7 +70,7 @@
           <FormField name="ipAddress" v-slot="$field">
             <FloatLabel variant="on">
               <InputText id="proxy-ip" name="ipAddress" v-model="form.ipAddress" :invalid="$field?.invalid" style="width: 100%" autocomplete="off" />
-              <label for="proxy-ip">IP Address (e.g. 192.168.1.1:8080)</label>
+              <label for="proxy-ip">IP Address (e.g. socks5://192.168.1.1:8080)</label>
             </FloatLabel>
             <Message v-if="$field?.invalid" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ $field.error?.message }}</Message>
           </FormField>
@@ -176,7 +176,7 @@ const resolver = ({ values }) => {
 		errors.ipAddress = [{ message: "IP Address is required." }];
 	} else if (!proxyRegex.test(values.ipAddress.trim())) {
 		errors.ipAddress = [
-			{ message: "Invalid Proxy format. Use domain.com or IP:Port." },
+			{ message: "Invalid Proxy format. Include schema if necessary (e.g. socks5://ip:port)." },
 		];
 	}
 	return { errors };
