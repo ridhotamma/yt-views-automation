@@ -34,6 +34,13 @@
           </template>
         </Column>
 
+        <Column field="createdAt" header="Created At">
+          <template #body="slotProps">
+            <Skeleton v-if="isLoading" width="100%" />
+            <span v-else>{{ slotProps.data.createdAt }}</span>
+          </template>
+        </Column>
+
         <Column header="Actions" :exportable="false" style="min-width:8rem">
           <template #body="slotProps">
             <div style="display: flex; gap: 0.5rem;" v-if="!isLoading">
@@ -128,6 +135,7 @@ const fetchProxies = async () => {
 			id: doc.$id,
 			name: doc.name,
 			ipAddress: doc.ipAddress,
+			createdAt: new Date(doc.$createdAt).toLocaleDateString(),
 		}));
 	} catch (e) {
 		console.error("Failed to fetch proxies", e);
@@ -193,6 +201,7 @@ const onFormSubmit = async ({ valid }) => {
 				id: doc.$id,
 				name: doc.name,
 				ipAddress: doc.ipAddress,
+				createdAt: new Date(doc.$createdAt).toLocaleDateString(),
 			});
 		} else {
 			await databases.updateDocument(dbId, collectionId, form.value.id, {

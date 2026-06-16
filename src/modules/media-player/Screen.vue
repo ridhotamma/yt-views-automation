@@ -31,6 +31,13 @@
 
     <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
       <div class="url-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+        <div style="margin-bottom: 0.5rem;">
+          <FloatLabel variant="on">
+            <Select id="proxy-select" v-model="selectedProxyId" :options="proxiesList" optionLabel="name" optionValue="id" style="width: 100%" showClear />
+            <label for="proxy-select">Proxy (Optional)</label>
+          </FloatLabel>
+        </div>
+
         <div v-for="(url, index) in queueList" :key="index" style="position: relative;">
           <FloatLabel variant="on">
             <InputText :id="'url-' + index" v-model="queueList[index]" style="width: 100%" autocomplete="off" />
@@ -45,12 +52,6 @@
             style="position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%);" 
             @click="queueList.splice(index, 1)" 
           />
-        </div>
-        <div style="margin-top: 1rem;">
-          <FloatLabel variant="on">
-            <Select id="proxy-select" v-model="selectedProxyId" :options="proxiesList" optionLabel="name" optionValue="id" style="width: 100%" showClear />
-            <label for="proxy-select">Proxy (Optional)</label>
-          </FloatLabel>
         </div>
 
         <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
