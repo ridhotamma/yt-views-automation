@@ -49,15 +49,21 @@
     <!-- Create/Edit Modal -->
     <Dialog v-model:visible="isModalVisible" modal :header="modalMode === 'create' ? 'Create New Proxy' : 'Edit Proxy'" :style="{ width: '450px' }" @hide="resetForm">
       <div class="form-container" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
-        <FloatLabel variant="on">
-          <InputText id="proxy-name" v-model="form.name" style="width: 100%" autocomplete="off" />
-          <label for="proxy-name">Name</label>
-        </FloatLabel>
+        <div>
+          <FloatLabel variant="on">
+            <InputText id="proxy-name" v-model="form.name" :invalid="!!errors.name" style="width: 100%" autocomplete="off" @input="errors.name = ''" />
+            <label for="proxy-name">Name</label>
+          </FloatLabel>
+          <Message v-if="errors.name" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ errors.name }}</Message>
+        </div>
         
-        <FloatLabel variant="on">
-          <InputText id="proxy-ip" v-model="form.ipAddress" style="width: 100%" autocomplete="off" />
-          <label for="proxy-ip">IP Address (e.g. 192.168.1.1:8080)</label>
-        </FloatLabel>
+        <div>
+          <FloatLabel variant="on">
+            <InputText id="proxy-ip" v-model="form.ipAddress" :invalid="!!errors.ipAddress" style="width: 100%" autocomplete="off" @input="errors.ipAddress = ''" />
+            <label for="proxy-ip">IP Address (e.g. 192.168.1.1:8080)</label>
+          </FloatLabel>
+          <Message v-if="errors.ipAddress" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ errors.ipAddress }}</Message>
+        </div>
 
         <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
       </div>
@@ -93,6 +99,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Skeleton from "primevue/skeleton";
 import { databases, ID } from "../../lib/appwrite.js";
+import { proxyRegex } from "../../constants/validator.js";
 
 const isLoading = ref(true);
 const proxies = ref([]);
@@ -101,6 +108,7 @@ const skeletonData = ref(Array.from({ length: 5 }));
 const isModalVisible = ref(false);
 const modalMode = ref("create"); // 'create' or 'edit'
 const form = ref({ id: null, name: "", ipAddress: "" });
+const errors = ref({ name: "", ipAddress: "" });
 const formError = ref("");
 
 const isDeleteModalVisible = ref(false);
@@ -132,6 +140,7 @@ onMounted(() => {
 const openCreateModal = () => {
 	modalMode.value = "create";
 	form.value = { id: null, name: "", ipAddress: "" };
+	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 	isModalVisible.value = true;
 };
@@ -139,27 +148,37 @@ const openCreateModal = () => {
 const openEditModal = (proxy) => {
 	modalMode.value = "edit";
 	form.value = { ...proxy };
+	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 	isModalVisible.value = true;
 };
 
 const resetForm = () => {
 	form.value = { id: null, name: "", ipAddress: "" };
+	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 };
 
 const saveProxy = async () => {
 	formError.value = "";
+	errors.value = { name: "", ipAddress: "" };
+
+	let isValid = true;
 
 	if (!form.value.name.trim()) {
-		formError.value = "Name is required.";
-		return;
+		errors.value.name = "Name is required.";
+		isValid = false;
 	}
 
 	if (!form.value.ipAddress.trim()) {
-		formError.value = "IP Address is required.";
-		return;
+		errors.value.ipAddress = "IP Address is required.";
+		isValid = false;
+	} else if (!proxyRegex.test(form.value.ipAddress.trim())) {
+		errors.value.ipAddress = "Invalid Proxy format. Use domain.com or IP:Port.";
+		isValid = false;
 	}
+
+	if (!isValid) return;
 
 	try {
 		if (modalMode.value === "create") {
