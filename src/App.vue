@@ -339,7 +339,6 @@ onUnmounted(() => {
 }
 
 .logout-btn:hover {
-  background-color: var(--p-red-50, #fef2f2);
-  color: var(--p-red-600, #dc2626);
+  background-color: var(--p-surface-800, #2a2a2a);
 }
 </style>

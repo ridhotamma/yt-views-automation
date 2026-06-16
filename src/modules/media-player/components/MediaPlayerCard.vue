@@ -49,7 +49,6 @@
     <!-- Delete Confirmation Modal -->
     <Dialog v-model:visible="isDeleteModalVisible" modal header="Confirm Delete" :style="{ width: '350px' }">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--p-orange-500);"></i>
         <span>Are you sure you want to delete this media player?</span>
       </div>
       <template #footer>
