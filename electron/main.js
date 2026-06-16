@@ -97,6 +97,43 @@ function createWindow() {
 		}
 	});
 
+	// Intercept Appwrite OAuth navigation
+	win.webContents.on("will-navigate", (event, url) => {
+		const isExternal = VITE_DEV_SERVER_URL 
+			? !url.startsWith(VITE_DEV_SERVER_URL)
+			: !url.startsWith("file://");
+
+		if (isExternal && url.includes("account/sessions/oauth2")) {
+			event.preventDefault();
+			
+			const authWin = new BrowserWindow({
+				width: 600,
+				height: 700,
+				webPreferences: {
+					nodeIntegration: false,
+					contextIsolation: true,
+				}
+			});
+
+			authWin.loadURL(url);
+
+			const handleRedirect = (e, newUrl) => {
+				const isInternal = VITE_DEV_SERVER_URL 
+					? newUrl.startsWith(VITE_DEV_SERVER_URL)
+					: newUrl.startsWith("file://") || newUrl.startsWith("youtumate://");
+					
+				if (isInternal) {
+					e.preventDefault();
+					authWin.close();
+					win.reload();
+				}
+			};
+
+			authWin.webContents.on("will-navigate", handleRedirect);
+			authWin.webContents.on("will-redirect", handleRedirect);
+		}
+	});
+
 	if (VITE_DEV_SERVER_URL) {
 		win.loadURL(VITE_DEV_SERVER_URL);
 	} else {
