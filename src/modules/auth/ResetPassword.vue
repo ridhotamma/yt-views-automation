@@ -46,74 +46,75 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { account } from '../../lib/appwrite'
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { account } from "../../lib/appwrite";
 
-import { Form } from '@primevue/forms'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import FloatLabel from 'primevue/floatlabel'
-import Message from 'primevue/message'
+import { Form } from "@primevue/forms";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import FloatLabel from "primevue/floatlabel";
+import Message from "primevue/message";
 
-const route = useRoute()
+const route = useRoute();
 
-const isLoading = ref(false)
-const authError = ref('')
-const successMessage = ref('')
+const isLoading = ref(false);
+const authError = ref("");
+const successMessage = ref("");
 
-const userId = ref('')
-const secret = ref('')
+const userId = ref("");
+const secret = ref("");
 
 onMounted(() => {
-  userId.value = route.query.userId || ''
-  secret.value = route.query.secret || ''
+	userId.value = route.query.userId || "";
+	secret.value = route.query.secret || "";
 
-  if (!userId.value || !secret.value) {
-    authError.value = 'Invalid password reset link. Please request a new one.'
-  }
-})
+	if (!userId.value || !secret.value) {
+		authError.value = "Invalid password reset link. Please request a new one.";
+	}
+});
 
 const resolver = ({ values }) => {
-  const errors = {}
+	const errors = {};
 
-  if (!values.password) {
-    errors.password = [{ message: 'Password is required' }]
-  } else if (values.password.length < 8) {
-    errors.password = [{ message: 'Password must be at least 8 characters' }]
-  }
+	if (!values.password) {
+		errors.password = [{ message: "Password is required" }];
+	} else if (values.password.length < 8) {
+		errors.password = [{ message: "Password must be at least 8 characters" }];
+	}
 
-  if (values.password !== values.confirmPassword) {
-    errors.confirmPassword = [{ message: 'Passwords do not match' }]
-  }
+	if (values.password !== values.confirmPassword) {
+		errors.confirmPassword = [{ message: "Passwords do not match" }];
+	}
 
-  return { errors }
-}
+	return { errors };
+};
 
 const onFormSubmit = async (e) => {
-  if (!e.valid) return
-  if (!userId.value || !secret.value) {
-    authError.value = 'Invalid or expired reset link.'
-    return
-  }
+	if (!e.valid) return;
+	if (!userId.value || !secret.value) {
+		authError.value = "Invalid or expired reset link.";
+		return;
+	}
 
-  isLoading.value = true
-  authError.value = ''
+	isLoading.value = true;
+	authError.value = "";
 
-  try {
-    await account.updateRecovery(
-      userId.value, 
-      secret.value, 
-      e.states.password.value, 
-      e.states.confirmPassword.value
-    )
-    successMessage.value = 'Your password has been successfully reset.'
-  } catch (error) {
-    authError.value = error.message || 'Failed to reset password. The link might be expired.'
-  } finally {
-    isLoading.value = false
-  }
-}
+	try {
+		await account.updateRecovery(
+			userId.value,
+			secret.value,
+			e.states.password.value,
+			e.states.confirmPassword.value,
+		);
+		successMessage.value = "Your password has been successfully reset.";
+	} catch (error) {
+		authError.value =
+			error.message || "Failed to reset password. The link might be expired.";
+	} finally {
+		isLoading.value = false;
+	}
+};
 </script>
 
 <style scoped>

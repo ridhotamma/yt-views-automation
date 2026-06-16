@@ -61,36 +61,38 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
+import { ref, onMounted, watch, computed } from "vue";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 
 const props = defineProps({
-  id: String,
-  name: String,
-  youtubeUrls: Array,
-  currentQueue: Number
-})
+	id: String,
+	name: String,
+	youtubeUrls: Array,
+	currentQueue: Number,
+});
 
-const emit = defineEmits(['stop', 'update:currentQueue'])
+const emit = defineEmits(["stop", "update:currentQueue"]);
 
-const currentIndex = ref(props.currentQueue || 0)
-const currentVideo = computed(() => props.youtubeUrls[currentIndex.value] || null)
+const currentIndex = ref(props.currentQueue || 0);
+const currentVideo = computed(
+	() => props.youtubeUrls[currentIndex.value] || null,
+);
 
-const isQueueModalVisible = ref(false)
-const isDeleteModalVisible = ref(false)
+const isQueueModalVisible = ref(false);
+const isDeleteModalVisible = ref(false);
 
 const playNext = () => {
-  if (currentIndex.value < props.youtubeUrls.length) {
-    currentIndex.value++
-    emit('update:currentQueue', currentIndex.value)
-  }
-}
+	if (currentIndex.value < props.youtubeUrls.length) {
+		currentIndex.value++;
+		emit("update:currentQueue", currentIndex.value);
+	}
+};
 
 const onDomReady = async (event) => {
-  const webview = event.target;
-  
-  const script = `
+	const webview = event.target;
+
+	const script = `
     (async () => {
       try {
         const video = document.querySelector('video');
@@ -112,23 +114,23 @@ const onDomReady = async (event) => {
       });
     })()
   `;
-  
-  try {
-    const result = await webview.executeJavaScript(script);
-    if (result === 'ENDED') playNext();
-  } catch (err) {
-    console.error("Webview script error:", err);
-  }
-}
+
+	try {
+		const result = await webview.executeJavaScript(script);
+		if (result === "ENDED") playNext();
+	} catch (err) {
+		console.error("Webview script error:", err);
+	}
+};
 
 const confirmDelete = () => {
-  isDeleteModalVisible.value = true
-}
+	isDeleteModalVisible.value = true;
+};
 
 const proceedDelete = () => {
-  isDeleteModalVisible.value = false
-  emit('stop', props.id)
-}
+	isDeleteModalVisible.value = false;
+	emit("stop", props.id);
+};
 </script>
 
 <style scoped>

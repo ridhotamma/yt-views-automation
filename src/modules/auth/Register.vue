@@ -60,75 +60,76 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { account } from '../../lib/appwrite'
-import { OAuthProvider, ID } from 'appwrite'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { account } from "../../lib/appwrite";
+import { OAuthProvider, ID } from "appwrite";
 
-import { Form } from '@primevue/forms'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import FloatLabel from 'primevue/floatlabel'
-import Message from 'primevue/message'
+import { Form } from "@primevue/forms";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import FloatLabel from "primevue/floatlabel";
+import Message from "primevue/message";
 
-const router = useRouter()
-const isLoading = ref(false)
-const authError = ref('')
+const router = useRouter();
+const isLoading = ref(false);
+const authError = ref("");
 
 const resolver = ({ values }) => {
-  const errors = {}
+	const errors = {};
 
-  if (!values.name || values.name.trim() === '') {
-    errors.name = [{ message: 'Name is required' }]
-  }
+	if (!values.name || values.name.trim() === "") {
+		errors.name = [{ message: "Name is required" }];
+	}
 
-  if (!values.email) {
-    errors.email = [{ message: 'Email is required' }]
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.email = [{ message: 'Please enter a valid email address' }]
-  }
+	if (!values.email) {
+		errors.email = [{ message: "Email is required" }];
+	} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+		errors.email = [{ message: "Please enter a valid email address" }];
+	}
 
-  if (!values.password) {
-    errors.password = [{ message: 'Password is required' }]
-  } else if (values.password.length < 8) {
-    errors.password = [{ message: 'Password must be at least 8 characters' }]
-  }
+	if (!values.password) {
+		errors.password = [{ message: "Password is required" }];
+	} else if (values.password.length < 8) {
+		errors.password = [{ message: "Password must be at least 8 characters" }];
+	}
 
-  return { errors }
-}
+	return { errors };
+};
 
 const onFormSubmit = async (e) => {
-  if (!e.valid) return
+	if (!e.valid) return;
 
-  isLoading.value = true
-  authError.value = ''
+	isLoading.value = true;
+	authError.value = "";
 
-  try {
-    const email = e.states.email.value
-    const password = e.states.password.value
-    const name = e.states.name.value
-    
-    // Register the user
-    await account.create(ID.unique(), email, password, name)
-    // Immediately log them in
-    await account.createEmailPasswordSession(email, password)
-    router.push('/')
-  } catch (error) {
-    authError.value = error.message || 'Failed to create account. Please try again.'
-  } finally {
-    isLoading.value = false
-  }
-}
+	try {
+		const email = e.states.email.value;
+		const password = e.states.password.value;
+		const name = e.states.name.value;
+
+		// Register the user
+		await account.create(ID.unique(), email, password, name);
+		// Immediately log them in
+		await account.createEmailPasswordSession(email, password);
+		router.push("/");
+	} catch (error) {
+		authError.value =
+			error.message || "Failed to create account. Please try again.";
+	} finally {
+		isLoading.value = false;
+	}
+};
 
 const handleGoogleLogin = () => {
-  try {
-    const successUrl = window.location.origin + '/'
-    const failureUrl = window.location.origin + '/register'
-    account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl)
-  } catch (error) {
-    authError.value = 'Failed to initialize Google login.'
-  }
-}
+	try {
+		const successUrl = window.location.origin + "/";
+		const failureUrl = window.location.origin + "/register";
+		account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
+	} catch (error) {
+		authError.value = "Failed to initialize Google login.";
+	}
+};
 </script>
 
 <style scoped>

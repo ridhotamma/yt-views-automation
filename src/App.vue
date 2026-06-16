@@ -45,62 +45,65 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { account } from './lib/appwrite'
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { account } from "./lib/appwrite";
 
-const router = useRouter()
-const route = useRoute()
-const isCollapsed = ref(window.innerWidth <= 1024)
+const router = useRouter();
+const route = useRoute();
+const isCollapsed = ref(window.innerWidth <= 1024);
 
 const handleResize = () => {
-  if (window.innerWidth <= 1024) {
-    isCollapsed.value = true
-  } else {
-    isCollapsed.value = false
-  }
-}
+	if (window.innerWidth <= 1024) {
+		isCollapsed.value = true;
+	} else {
+		isCollapsed.value = false;
+	}
+};
 
 const handleLogout = async () => {
-  try {
-    await account.deleteSession('current')
-    router.push('/login')
-  } catch (err) {
-    console.error('Logout failed', err)
-  }
-}
+	try {
+		await account.deleteSession("current");
+		router.push("/login");
+	} catch (err) {
+		console.error("Logout failed", err);
+	}
+};
 
 onMounted(() => {
-  window.addEventListener('resize', handleResize)
+	window.addEventListener("resize", handleResize);
 
-  if (window.ipcRenderer) {
-    window.ipcRenderer.on('deep-link', (event, url) => {
-      try {
-        const urlObj = new URL(url)
-        // youtumate://reset-password
-        if (urlObj.hostname === 'reset-password' || urlObj.pathname.includes('reset-password')) {
-          const params = new URLSearchParams(urlObj.search)
-          router.push({
-            path: '/reset-password',
-            query: {
-              userId: params.get('userId'),
-              secret: params.get('secret')
-            }
-          })
-        }
-      } catch (err) {
-        console.error('Failed to parse deep link URL', err)
-      }
-    })
-  }
-})
+	if (window.ipcRenderer) {
+		window.ipcRenderer.on("deep-link", (event, url) => {
+			try {
+				const urlObj = new URL(url);
+				// youtumate://reset-password
+				if (
+					urlObj.hostname === "reset-password" ||
+					urlObj.pathname.includes("reset-password")
+				) {
+					const params = new URLSearchParams(urlObj.search);
+					router.push({
+						path: "/reset-password",
+						query: {
+							userId: params.get("userId"),
+							secret: params.get("secret"),
+						},
+					});
+				}
+			} catch (err) {
+				console.error("Failed to parse deep link URL", err);
+			}
+		});
+	}
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  if (window.ipcRenderer) {
-    window.ipcRenderer.off('deep-link')
-  }
-})
+	window.removeEventListener("resize", handleResize);
+	if (window.ipcRenderer) {
+		window.ipcRenderer.off("deep-link");
+	}
+});
 </script>
 
 <style scoped>

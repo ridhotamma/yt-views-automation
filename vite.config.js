@@ -1,26 +1,26 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import electron from 'vite-plugin-electron/simple'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import electron from "vite-plugin-electron/simple";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    electron({
-      main: {
-        entry: 'electron/main.js',
-        vite: {
-          build: {
-            rollupOptions: {
-              external: ['playwright', 'playwright-core', 'fsevents']
-            }
-          }
-        }
-      },
-      preload: {
-        input: 'electron/preload.js',
-      },
-      renderer: {},
-    }),
-  ],
-})
+	plugins: [
+		vue(),
+		electron({
+			main: {
+				entry: "electron/main.js",
+				vite: {
+					build: {
+						rollupOptions: {
+							external: ["playwright", "playwright-core", "fsevents"],
+						},
+					},
+				},
+			},
+			preload: {
+				input: "electron/preload.js",
+			},
+			renderer: {},
+		}),
+	],
+});

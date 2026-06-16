@@ -40,49 +40,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { account } from '../../lib/appwrite'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { account } from "../../lib/appwrite";
 
-import { Form } from '@primevue/forms'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import FloatLabel from 'primevue/floatlabel'
-import Message from 'primevue/message'
+import { Form } from "@primevue/forms";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import FloatLabel from "primevue/floatlabel";
+import Message from "primevue/message";
 
-const router = useRouter()
-const isLoading = ref(false)
-const authError = ref('')
-const successMessage = ref('')
+const router = useRouter();
+const isLoading = ref(false);
+const authError = ref("");
+const successMessage = ref("");
 
 const resolver = ({ values }) => {
-  const errors = {}
+	const errors = {};
 
-  if (!values.email) {
-    errors.email = [{ message: 'Email is required' }]
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.email = [{ message: 'Please enter a valid email address' }]
-  }
+	if (!values.email) {
+		errors.email = [{ message: "Email is required" }];
+	} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+		errors.email = [{ message: "Please enter a valid email address" }];
+	}
 
-  return { errors }
-}
+	return { errors };
+};
 
 const onFormSubmit = async (e) => {
-  if (!e.valid) return
+	if (!e.valid) return;
 
-  isLoading.value = true
-  authError.value = ''
+	isLoading.value = true;
+	authError.value = "";
 
-  try {
-    const url = 'youtumate://reset-password'
-    await account.createRecovery(e.states.email.value, url)
-    successMessage.value = 'A password reset link has been sent to your email.'
-  } catch (error) {
-    authError.value = error.message || 'Failed to send recovery email. Please try again.'
-  } finally {
-    isLoading.value = false
-  }
-}
+	try {
+		const url = "youtumate://reset-password";
+		await account.createRecovery(e.states.email.value, url);
+		successMessage.value = "A password reset link has been sent to your email.";
+	} catch (error) {
+		authError.value =
+			error.message || "Failed to send recovery email. Please try again.";
+	} finally {
+		isLoading.value = false;
+	}
+};
 </script>
 
 <style scoped>

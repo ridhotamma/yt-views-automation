@@ -54,63 +54,67 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { account } from '../../lib/appwrite'
-import { OAuthProvider } from 'appwrite'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { account } from "../../lib/appwrite";
+import { OAuthProvider } from "appwrite";
 
-import { Form } from '@primevue/forms'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import FloatLabel from 'primevue/floatlabel'
-import Message from 'primevue/message'
+import { Form } from "@primevue/forms";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import FloatLabel from "primevue/floatlabel";
+import Message from "primevue/message";
 
-const router = useRouter()
-const isLoading = ref(false)
-const authError = ref('')
+const router = useRouter();
+const isLoading = ref(false);
+const authError = ref("");
 
 const resolver = ({ values }) => {
-  const errors = {}
+	const errors = {};
 
-  if (!values.email) {
-    errors.email = [{ message: 'Email is required' }]
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.email = [{ message: 'Please enter a valid email address' }]
-  }
+	if (!values.email) {
+		errors.email = [{ message: "Email is required" }];
+	} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+		errors.email = [{ message: "Please enter a valid email address" }];
+	}
 
-  if (!values.password) {
-    errors.password = [{ message: 'Password is required' }]
-  } else if (values.password.length < 8) {
-    errors.password = [{ message: 'Password must be at least 8 characters' }]
-  }
+	if (!values.password) {
+		errors.password = [{ message: "Password is required" }];
+	} else if (values.password.length < 8) {
+		errors.password = [{ message: "Password must be at least 8 characters" }];
+	}
 
-  return { errors }
-}
+	return { errors };
+};
 
 const onFormSubmit = async (e) => {
-  if (!e.valid) return
+	if (!e.valid) return;
 
-  isLoading.value = true
-  authError.value = ''
+	isLoading.value = true;
+	authError.value = "";
 
-  try {
-    await account.createEmailPasswordSession(e.states.email.value, e.states.password.value)
-    router.push('/')
-  } catch (error) {
-    authError.value = error.message || 'Failed to login. Please check your credentials.'
-  } finally {
-    isLoading.value = false
-  }
-}
+	try {
+		await account.createEmailPasswordSession(
+			e.states.email.value,
+			e.states.password.value,
+		);
+		router.push("/");
+	} catch (error) {
+		authError.value =
+			error.message || "Failed to login. Please check your credentials.";
+	} finally {
+		isLoading.value = false;
+	}
+};
 
 const handleGoogleLogin = () => {
-  try {
-    const successUrl = window.location.origin + "/";
-    const failureUrl = window.location.origin + "/login";
-    account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
-  } catch (error) {
-    authError.value = "Failed to initialize Google login.";
-  }
+	try {
+		const successUrl = window.location.origin + "/";
+		const failureUrl = window.location.origin + "/login";
+		account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
+	} catch (error) {
+		authError.value = "Failed to initialize Google login.";
+	}
 };
 </script>
 

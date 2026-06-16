@@ -59,64 +59,65 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import FloatLabel from 'primevue/floatlabel'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
-import MediaPlayerCard from './components/MediaPlayerCard.vue'
+import { ref } from "vue";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import FloatLabel from "primevue/floatlabel";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
+import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 
-const isModalVisible = ref(false)
-const players = ref([])
-const playerName = ref('')
-const queueList = ref([''])
-const formError = ref('')
+const isModalVisible = ref(false);
+const players = ref([]);
+const playerName = ref("");
+const queueList = ref([""]);
+const formError = ref("");
 
 const resetForm = () => {
-  playerName.value = ''
-  queueList.value = ['']
-  formError.value = ''
-}
+	playerName.value = "";
+	queueList.value = [""];
+	formError.value = "";
+};
 
 const startPlayer = () => {
-  formError.value = '';
+	formError.value = "";
 
-  if (!playerName.value.trim()) {
-    formError.value = 'Please provide a player name.';
-    return;
-  }
+	if (!playerName.value.trim()) {
+		formError.value = "Please provide a player name.";
+		return;
+	}
 
-  const urls = queueList.value.map(u => u.trim()).filter(u => u);
-  
-  if (urls.length === 0) {
-    formError.value = 'Please provide at least one URL.';
-    return;
-  }
-  
-  const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+$/;
-  for (const url of urls) {
-    if (!ytRegex.test(url)) {
-      formError.value = 'Invalid YouTube URL: ' + url;
-      return;
-    }
-  }
+	const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
 
-  players.value.push({
-    id: crypto.randomUUID(),
-    name: playerName.value.trim(),
-    youtubeUrls: urls,
-    userId: 'anonymous',
-    currentQueue: 0
-  })
-  
-  isModalVisible.value = false;
-  resetForm(); // Reset for next time
-}
+	if (urls.length === 0) {
+		formError.value = "Please provide at least one URL.";
+		return;
+	}
+
+	const ytRegex =
+		/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+$/;
+	for (const url of urls) {
+		if (!ytRegex.test(url)) {
+			formError.value = "Invalid YouTube URL: " + url;
+			return;
+		}
+	}
+
+	players.value.push({
+		id: crypto.randomUUID(),
+		name: playerName.value.trim(),
+		youtubeUrls: urls,
+		userId: "anonymous",
+		currentQueue: 0,
+	});
+
+	isModalVisible.value = false;
+	resetForm(); // Reset for next time
+};
 
 const stopPlayer = (id) => {
-  players.value = players.value.filter(p => p.id !== id)
-}
+	players.value = players.value.filter((p) => p.id !== id);
+};
 </script>
 
 <style scoped>
