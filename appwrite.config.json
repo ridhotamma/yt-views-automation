@@ -105,6 +105,31 @@
                     "array": false,
                     "default": null,
                     "encrypt": false
+                },
+                {
+                    "key": "youtubeUrls",
+                    "type": "text",
+                    "required": false,
+                    "array": true,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "userId",
+                    "type": "text",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "currentQueue",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0,
+                    "min": 0,
+                    "max": 9999
                 }
             ],
             "indexes": []

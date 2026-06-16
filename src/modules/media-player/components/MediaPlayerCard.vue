@@ -1,6 +1,9 @@
 <template>
   <div class="player-card">
     <!-- Top Section: Webview -->
+    <div class="player-header">
+      <span class="player-name">{{ name || 'Media Player' }}</span>
+    </div>
     <div class="webview-container" v-if="currentVideo">
       <webview 
         :src="currentVideo" 
@@ -17,7 +20,7 @@
     <div class="controls-bar">
       <div class="queue-info" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true">
         <i class="pi pi-list"></i>
-        <span>Queue: {{ queue.length }}</span>
+        <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
       </div>
       <Button 
         icon="pi pi-trash" 
@@ -32,9 +35,12 @@
 
     <!-- Queue Modal -->
     <Dialog v-model:visible="isQueueModalVisible" modal header="Upcoming Videos" :style="{ width: '450px' }">
-      <ul class="queue-list" v-if="queue.length > 0">
-        <li v-for="(video, index) in queue" :key="index" class="queue-item">
-          {{ index + 1 }}. {{ video }}
+      <ul class="queue-list" v-if="youtubeUrls.length > 0">
+        <li v-for="(video, index) in youtubeUrls" :key="index" class="queue-item" :class="{ 'active-item': index === currentQueue, 'played-item': index < currentQueue }">
+          <i v-if="index === currentQueue" class="pi pi-play" style="margin-right: 0.5rem; color: var(--p-primary-color);"></i>
+          <i v-else-if="index < currentQueue" class="pi pi-check" style="margin-right: 0.5rem; color: var(--p-green-500);"></i>
+          <span v-else style="margin-right: 0.5rem; opacity: 0.5;">{{ index + 1 }}.</span>
+          {{ video }}
         </li>
       </ul>
       <p v-else style="text-align: center; color: var(--p-surface-500); padding: 2rem 0;">No upcoming videos in queue.</p>
@@ -55,31 +61,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 
 const props = defineProps({
   id: String,
-  initialQueue: Array
+  name: String,
+  youtubeUrls: Array,
+  currentQueue: Number
 })
 
-const emit = defineEmits(['stop'])
+const emit = defineEmits(['stop', 'update:currentQueue'])
 
-const queue = ref([...props.initialQueue])
-const currentVideo = ref(null)
+const currentIndex = ref(props.currentQueue || 0)
+const currentVideo = computed(() => props.youtubeUrls[currentIndex.value] || null)
+
 const isQueueModalVisible = ref(false)
 const isDeleteModalVisible = ref(false)
 
 const playNext = () => {
-  if (queue.value.length === 0) {
-    currentVideo.value = null
-    return
+  if (currentIndex.value < props.youtubeUrls.length) {
+    currentIndex.value++
+    emit('update:currentQueue', currentIndex.value)
   }
-  currentVideo.value = queue.value.shift()
 }
-
-onMounted(() => playNext())
 
 const onDomReady = async (event) => {
   const webview = event.target;
@@ -129,17 +135,34 @@ const proceedDelete = () => {
 .player-card {
   display: flex;
   flex-direction: column;
-  height: 320px;
+  height: 360px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   background-color: var(--p-surface-900);
 }
 
+.player-header {
+  padding: 0.75rem 1rem;
+  background-color: var(--p-surface-800);
+  border-bottom: 1px solid var(--p-surface-700);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.player-name {
+  font-size: 1rem;
+  color: var(--p-surface-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .webview-container {
   flex: 1;
   position: relative;
-  background-color: #000; /* Black background behind video */
+  background-color: #000;
 }
 
 .empty-bg {
@@ -190,5 +213,17 @@ const proceedDelete = () => {
   padding: 0.75rem;
   background-color: var(--p-surface-800);
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.active-item {
+  background-color: rgba(var(--p-primary-color-rgb), 0.1);
+  border: 1px solid var(--p-primary-color);
+  font-weight: 600;
+}
+
+.played-item {
+  opacity: 0.6;
 }
 </style>

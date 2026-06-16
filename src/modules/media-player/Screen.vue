@@ -10,8 +10,11 @@
         v-for="player in players" 
         :key="player.id" 
         :id="player.id"
-        :initialQueue="player.queue"
+        :name="player.name"
+        :youtubeUrls="player.youtubeUrls"
+        :currentQueue="player.currentQueue"
         @stop="stopPlayer"
+        @update:currentQueue="(val) => player.currentQueue = val"
       />
       <div v-if="players.length === 0" class="empty-state">
         <i class="pi pi-video empty-icon"></i>
@@ -21,6 +24,11 @@
 
     <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
       <div class="url-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+        <FloatLabel variant="on" style="margin-bottom: 0.5rem;">
+          <InputText id="player-name" v-model="playerName" style="width: 100%" autocomplete="off" />
+          <label for="player-name">Player Name</label>
+        </FloatLabel>
+        
         <div v-for="(url, index) in queueList" :key="index" style="position: relative;">
           <FloatLabel variant="on">
             <InputText :id="'url-' + index" v-model="queueList[index]" style="width: 100%" autocomplete="off" />
@@ -61,16 +69,24 @@ import MediaPlayerCard from './components/MediaPlayerCard.vue'
 
 const isModalVisible = ref(false)
 const players = ref([])
+const playerName = ref('')
 const queueList = ref([''])
 const formError = ref('')
 
 const resetForm = () => {
+  playerName.value = ''
   queueList.value = ['']
   formError.value = ''
 }
 
 const startPlayer = () => {
   formError.value = '';
+
+  if (!playerName.value.trim()) {
+    formError.value = 'Please provide a player name.';
+    return;
+  }
+
   const urls = queueList.value.map(u => u.trim()).filter(u => u);
   
   if (urls.length === 0) {
@@ -88,11 +104,14 @@ const startPlayer = () => {
 
   players.value.push({
     id: crypto.randomUUID(),
-    queue: urls
+    name: playerName.value.trim(),
+    youtubeUrls: urls,
+    userId: 'anonymous',
+    currentQueue: 0
   })
   
   isModalVisible.value = false;
-  queueList.value = ['']; // Reset for next time
+  resetForm(); // Reset for next time
 }
 
 const stopPlayer = (id) => {
