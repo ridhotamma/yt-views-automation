@@ -1,5 +1,6 @@
 {
-  "name": "yt-views-automation",
+  "name": "youtumate",
+  "productName": "Youtumate",
   "private": true,
   "version": "0.0.0",
   "type": "module",
