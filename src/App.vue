@@ -1,12 +1,30 @@
 <template>
   <div id="app-layout">
-    <nav class="top-nav">
-      <router-link to="/" class="nav-brand">App</router-link>
-      <div class="nav-links">
-        <router-link to="/">Home</router-link>
-        <router-link to="/proxy">Proxy List</router-link>
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ collapsed: isCollapsed }">
+      <div class="sidebar-header">
+        <span v-if="!isCollapsed" class="brand-title font-britney">Youtumate</span>
+        <span v-else class="brand-title font-britney collapsed-logo">Y</span>
       </div>
-    </nav>
+
+      <button class="toggle-btn" @click="isCollapsed = !isCollapsed" v-tooltip.right="isCollapsed ? 'Expand' : 'Collapse'">
+        <i :class="isCollapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'"></i>
+      </button>
+
+      <div class="sidebar-menu">
+        <router-link to="/" class="menu-item" v-tooltip.right="isCollapsed ? 'Home' : ''" active-class="active">
+          <i class="pi pi-home menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Home</span>
+        </router-link>
+        
+        <router-link to="/proxy" class="menu-item" v-tooltip.right="isCollapsed ? 'Proxy List' : ''" active-class="active">
+          <i class="pi pi-list menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Proxy List</span>
+        </router-link>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
     <main class="main-content">
       <router-view />
     </main>
@@ -14,43 +32,129 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
+const isCollapsed = ref(false)
 </script>
 
 <style scoped>
 #app-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
+  width: 100%;
 }
-.top-nav {
+
+.sidebar {
+  width: 250px;
+  background-color: var(--p-surface-900, #1a1a1a);
+  color: var(--p-surface-0, #fff);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  border-right: 1px solid var(--p-surface-700, #333);
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar-header {
   display: flex;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #1a1a1a;
-  border-bottom: 1px solid #333;
+  padding: 1rem;
+  height: 70px;
+  position: relative;
+  border-bottom: 1px solid var(--p-surface-700, #333);
+  overflow: hidden;
 }
-.nav-brand {
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin-right: 2rem;
-  color: #fff;
-  text-decoration: none;
+
+.font-britney {
+  font-family: 'Britney', cursive;
 }
-.nav-links {
+
+.brand-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  white-space: nowrap;
+  color: var(--p-primary-500, #ef4444);
+}
+
+.collapsed-logo {
+  font-size: 1.75rem;
+  margin: 0 auto;
+}
+
+.toggle-btn {
+  position: absolute;
+  right: -12px;
+  top: 35px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--p-primary-500, #ef4444);
+  color: white;
+  border: none;
+  cursor: pointer;
   display: flex;
-  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
-.nav-links a {
-  color: #aaa;
+
+.toggle-btn:hover {
+  background-color: var(--p-primary-400, #f87171);
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  gap: 0.5rem;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: var(--p-surface-400, #aaa);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  overflow: hidden;
+  white-space: nowrap;
 }
-.nav-links a:hover,
-.nav-links a.router-link-active {
-  color: #fff;
+
+.menu-item:hover {
+  background-color: var(--p-surface-800, #2a2a2a);
+  color: var(--p-surface-0, #fff);
 }
+
+.menu-item.active {
+  background-color: var(--p-primary-900, #450a0a);
+  color: var(--p-primary-400, #f87171);
+  border-right: 3px solid var(--p-primary-500, #ef4444);
+}
+
+.menu-icon {
+  font-size: 1.25rem;
+  margin-right: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+.sidebar.collapsed .menu-icon {
+  margin-right: 0;
+}
+
 .main-content {
   flex: 1;
+  background-color: var(--p-surface-950, #121212);
+  overflow-y: auto;
 }
 </style>
