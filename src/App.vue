@@ -59,7 +59,8 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <router-view />
+      <MediaPlayerScreen v-show="$route.name === 'media-player'" />
+      <router-view v-show="$route.name !== 'media-player'" />
     </main>
   </div>
 </template>
@@ -72,6 +73,7 @@ import { useAuthStore } from "./store/auth";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import Popover from "primevue/popover";
+import MediaPlayerScreen from "./modules/media-player/Screen.vue";
 
 const router = useRouter();
 const route = useRoute();

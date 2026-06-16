@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import MediaPlayerScreen from "../modules/media-player/Screen.vue";
+import { h } from "vue";
+const EmptyView = { render: () => h("div") };
 import ProxyScreen from "../modules/proxy/Screen.vue";
 import LoginScreen from "../modules/auth/Screen.vue";
 import { account } from "../lib/appwrite";
@@ -16,7 +17,7 @@ const router = createRouter({
 		{
 			path: "/",
 			name: "media-player",
-			component: MediaPlayerScreen,
+			component: EmptyView,
 			meta: { requiresAuth: true },
 		},
 		{
