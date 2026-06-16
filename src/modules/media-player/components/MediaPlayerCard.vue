@@ -1,9 +1,6 @@
 <template>
   <div class="player-card">
     <!-- Top Section: Webview -->
-    <div class="player-header">
-      <span class="player-name">{{ name || 'Media Player' }}</span>
-    </div>
     <div class="webview-container" v-if="currentVideo">
       <webview 
         :src="currentVideo" 
@@ -66,7 +63,6 @@ import Dialog from "primevue/dialog";
 
 const props = defineProps({
 	id: String,
-	name: String,
 	youtubeUrls: Array,
 	currentQueue: Number,
 });
@@ -141,23 +137,6 @@ const proceedDelete = () => {
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   background-color: var(--p-surface-900);
-}
-
-.player-header {
-  padding: 0.75rem 1rem;
-  background-color: var(--p-surface-800);
-  border-bottom: 1px solid var(--p-surface-700);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-.player-name {
-  font-size: 1rem;
-  color: var(--p-surface-0);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .webview-container {

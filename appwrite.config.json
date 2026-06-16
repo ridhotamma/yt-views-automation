@@ -243,14 +243,6 @@
 			"rowSecurity": false,
 			"columns": [
 				{
-					"key": "name",
-					"type": "text",
-					"required": false,
-					"array": false,
-					"default": null,
-					"encrypt": false
-				},
-				{
 					"key": "youtubeUrls",
 					"type": "text",
 					"required": false,

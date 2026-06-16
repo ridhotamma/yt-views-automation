@@ -16,7 +16,6 @@
           v-for="player in players" 
           :key="player.id" 
           :id="player.id"
-          :name="player.name"
           :youtubeUrls="player.youtubeUrls"
           :currentQueue="player.currentQueue"
           @stop="stopPlayer"
@@ -31,11 +30,6 @@
 
     <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
       <div class="url-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
-        <FloatLabel variant="on" style="margin-bottom: 0.5rem;">
-          <InputText id="player-name" v-model="playerName" style="width: 100%" autocomplete="off" />
-          <label for="player-name">Player Name</label>
-        </FloatLabel>
-        
         <div v-for="(url, index) in queueList" :key="index" style="position: relative;">
           <FloatLabel variant="on">
             <InputText :id="'url-' + index" v-model="queueList[index]" style="width: 100%" autocomplete="off" />
@@ -81,7 +75,6 @@ import { useAuthStore } from "../../store/auth.js";
 const isModalVisible = ref(false);
 const isLoading = ref(true);
 const players = ref([]);
-const playerName = ref("");
 const queueList = ref([""]);
 const formError = ref("");
 const authStore = useAuthStore();
@@ -102,7 +95,6 @@ onMounted(async () => {
 
 			players.value = res.documents.map((doc) => ({
 				id: doc.$id,
-				name: doc.name,
 				youtubeUrls: doc.youtubeUrls,
 				currentQueue: doc.currentQueue,
 				userId: doc.userId,
@@ -116,18 +108,12 @@ onMounted(async () => {
 });
 
 const resetForm = () => {
-	playerName.value = "";
 	queueList.value = [""];
 	formError.value = "";
 };
 
 const startPlayer = async () => {
 	formError.value = "";
-
-	if (!playerName.value.trim()) {
-		formError.value = "Please provide a player name.";
-		return;
-	}
 
 	const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
 
@@ -154,7 +140,6 @@ const startPlayer = async () => {
 			collectionId,
 			ID.unique(),
 			{
-				name: playerName.value.trim(),
 				youtubeUrls: urls,
 				userId: currentUser.value.$id,
 				currentQueue: 0,
@@ -163,7 +148,6 @@ const startPlayer = async () => {
 
 		players.value.push({
 			id: doc.$id,
-			name: doc.name,
 			youtubeUrls: doc.youtubeUrls,
 			userId: doc.userId,
 			currentQueue: doc.currentQueue,
