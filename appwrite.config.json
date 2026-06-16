@@ -231,7 +231,12 @@
 		},
 		{
 			"$id": "media_players",
-			"$permissions": [],
+			"$permissions": [
+				"create(\"users\")",
+				"read(\"users\")",
+				"update(\"users\")",
+				"delete(\"users\")"
+			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "media_players",
 			"enabled": true,
