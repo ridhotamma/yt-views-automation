@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, screen } from 'electron'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -22,8 +22,13 @@ let win
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 function createWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width, height } = primaryDisplay.workAreaSize
+
   win = new BrowserWindow({
-    minWidth: 400,
+    width: Math.floor(width / 2),
+    height: Math.floor(height * 0.9),
+    minWidth: Math.floor(width / 2),
     minHeight: 600,
     icon: join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {

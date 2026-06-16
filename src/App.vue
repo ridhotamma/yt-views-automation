@@ -32,9 +32,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const isCollapsed = ref(false)
+const isCollapsed = ref(window.innerWidth <= 1024)
+
+const handleResize = () => {
+  if (window.innerWidth <= 1024) {
+    isCollapsed.value = true
+  } else {
+    isCollapsed.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 
 <style scoped>

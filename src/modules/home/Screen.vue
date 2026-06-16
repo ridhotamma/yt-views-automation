@@ -65,6 +65,8 @@ const stopPlayer = (id) => {
 <style scoped>
 .screen-container {
   padding: 2rem;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .header-actions {

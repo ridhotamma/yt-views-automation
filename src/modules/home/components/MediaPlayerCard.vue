@@ -1,56 +1,63 @@
 <template>
   <div class="player-card">
-    <!-- Embedded Webview Background -->
-    <div class="video-background" v-if="currentVideo">
+    <!-- Top Section: Webview -->
+    <div class="webview-container" v-if="currentVideo">
       <webview 
         :src="currentVideo" 
         style="width: 100%; height: 100%; border: none;"
-        allowpopups
         webpreferences="autoplayPolicy=no-user-gesture-required"
         @dom-ready="onDomReady"
       ></webview>
     </div>
-    <div class="video-background empty-bg" v-else>
+    <div class="webview-container empty-bg" v-else>
       <i class="pi pi-video" style="font-size: 2rem; color: var(--p-surface-500);"></i>
     </div>
 
-    <!-- Black Gradient Overlay (pointer-events: none lets clicks pass through to webview) -->
-    <div class="gradient-overlay"></div>
-
-    <!-- Top Right Actions -->
-    <div class="top-right-actions">
-      <div class="queue-badge" v-tooltip.top="'Videos remaining in queue'">
+    <!-- Bottom Section: Controls -->
+    <div class="controls-bar">
+      <div class="queue-info" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true">
         <i class="pi pi-list"></i>
-        <span>{{ queue.length }}</span>
+        <span>Queue: {{ queue.length }}</span>
       </div>
       <Button 
         icon="pi pi-trash" 
         severity="danger" 
+        text
         rounded 
         aria-label="Delete Player"
         v-tooltip.top="'Delete Player'"
         @click="confirmDelete" 
-        :disabled="status === 'finished' || status === 'error'" 
       />
     </div>
 
-    <!-- Bottom Content (pointer-events: none lets clicks pass through if overlapping) -->
-    <div class="bottom-content">
-      <div class="status-row">
-        <span class="player-title">Player Instance</span>
-        <Tag :value="status" :severity="getStatusSeverity(status)" />
+    <!-- Queue Modal -->
+    <Dialog v-model:visible="isQueueModalVisible" modal header="Upcoming Videos" :style="{ width: '450px' }">
+      <ul class="queue-list" v-if="queue.length > 0">
+        <li v-for="(video, index) in queue" :key="index" class="queue-item">
+          {{ index + 1 }}. {{ video }}
+        </li>
+      </ul>
+      <p v-else style="text-align: center; color: var(--p-surface-500); padding: 2rem 0;">No upcoming videos in queue.</p>
+    </Dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <Dialog v-model:visible="isDeleteModalVisible" modal header="Confirm Delete" :style="{ width: '350px' }">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--p-orange-500);"></i>
+        <span>Are you sure you want to delete this media player?</span>
       </div>
-      <p class="current-video truncate" :title="currentVideo">
-        {{ currentVideo || 'No active video' }}
-      </p>
-    </div>
+      <template #footer>
+        <Button label="No" icon="pi pi-times" text @click="isDeleteModalVisible = false" autofocus />
+        <Button label="Yes" icon="pi pi-check" severity="danger" @click="proceedDelete" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
-import Tag from 'primevue/tag'
+import Dialog from 'primevue/dialog'
 
 const props = defineProps({
   id: String,
@@ -61,37 +68,33 @@ const emit = defineEmits(['stop'])
 
 const queue = ref([...props.initialQueue])
 const currentVideo = ref(null)
-const status = ref('starting')
+const isQueueModalVisible = ref(false)
+const isDeleteModalVisible = ref(false)
 
 const playNext = () => {
   if (queue.value.length === 0) {
-    status.value = 'finished'
     currentVideo.value = null
     return
   }
   currentVideo.value = queue.value.shift()
-  status.value = 'running'
 }
 
-onMounted(() => {
-  playNext()
-})
+onMounted(() => playNext())
 
 const onDomReady = async (event) => {
   const webview = event.target;
   
-  // Script injected into the webview to automate YouTube playback
   const script = `
     (async () => {
-      // Attempt to click play bypassing strict autoplay
       try {
+        const video = document.querySelector('video');
+        if (video) video.muted = true;
+
         const playBtn = document.querySelector('.ytp-play-button.ytp-button');
-        if (playBtn && playBtn.title.includes('Play')) {
-           playBtn.click();
-        }
+        if (playBtn && playBtn.title.includes('Play')) playBtn.click();
+
       } catch(e) {}
 
-      // Poll for the player to reach ended-mode natively
       return new Promise(resolve => {
         const interval = setInterval(() => {
           const player = document.querySelector('.html5-video-player.ended-mode');
@@ -106,51 +109,37 @@ const onDomReady = async (event) => {
   
   try {
     const result = await webview.executeJavaScript(script);
-    if (result === 'ENDED') {
-      playNext();
-    }
+    if (result === 'ENDED') playNext();
   } catch (err) {
     console.error("Webview script error:", err);
   }
 }
 
 const confirmDelete = () => {
-  if (window.confirm("Are you sure you want to delete this media player?")) {
-    emit('stop', props.id)
-  }
+  isDeleteModalVisible.value = true
 }
 
-const getStatusSeverity = (status) => {
-  switch (status) {
-    case 'running': return 'success'
-    case 'starting': return 'info'
-    case 'finished': return 'secondary'
-    case 'error': return 'danger'
-    default: return 'info'
-  }
+const proceedDelete = () => {
+  isDeleteModalVisible.value = false
+  emit('stop', props.id)
 }
 </script>
 
 <style scoped>
 .player-card {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   height: 320px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   background-color: var(--p-surface-900);
 }
 
-.video-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
+.webview-container {
+  flex: 1;
+  position: relative;
+  background-color: #000; /* Black background behind video */
 }
 
 .empty-bg {
@@ -160,69 +149,46 @@ const getStatusSeverity = (status) => {
   background-color: var(--p-surface-800);
 }
 
-.gradient-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 100%);
-  pointer-events: none;
-}
-
-.top-right-actions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.queue-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  padding: 0.4rem 0.75rem;
-  border-radius: 20px;
-  color: white;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-.bottom-content {
-  position: relative;
-  z-index: 2;
-  padding: 1.25rem;
-  pointer-events: none;
-}
-
-.status-row {
+.controls-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--p-surface-900);
+  border-top: 1px solid var(--p-surface-800);
+  height: 50px;
 }
 
-.player-title {
-  font-weight: 600;
-  color: white;
-  font-size: 1.1rem;
-}
-
-.current-video {
-  margin: 0;
+.queue-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--p-surface-300);
-  font-size: 0.85rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.queue-info:hover {
+  color: var(--p-primary-color);
+}
+
+.queue-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.queue-item {
+  word-break: break-all;
+  color: var(--p-surface-200);
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  background-color: var(--p-surface-800);
+  border-radius: 6px;
 }
 </style>
