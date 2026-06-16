@@ -287,6 +287,21 @@
 			"commands": "npm install",
 			"scopes": ["databases.read", "databases.write"],
 			"path": "functions/check-expired-subscriptions"
+		},
+		{
+			"$id": "mayar_webhook",
+			"name": "mayar_webhook",
+			"runtime": "node-21.0",
+			"execute": ["any"],
+			"events": [],
+			"schedule": "",
+			"timeout": 15,
+			"enabled": true,
+			"logging": true,
+			"entrypoint": "src/index.js",
+			"commands": "npm install",
+			"scopes": ["databases.read", "databases.write"],
+			"path": "functions/mayar-webhook"
 		}
 	]
 }
