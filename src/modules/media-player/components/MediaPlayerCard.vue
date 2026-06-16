@@ -140,11 +140,28 @@ const onDomReady = async (event) => {
 
       return new Promise(resolve => {
         const interval = setInterval(() => {
-          const player = document.querySelector('.html5-video-player.ended-mode');
-          if (player) {
-            clearInterval(interval);
-            resolve('ENDED');
-          }
+          try {
+            // Auto skip ads if the button appears
+            const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
+            if (skipBtn) skipBtn.click();
+
+            const player = document.querySelector('.html5-video-player');
+            const video = document.querySelector('video');
+            
+            if (player && video) {
+              const isAd = player.classList.contains('ad-showing');
+              const isEnded = player.classList.contains('ended-mode');
+              
+              if (isEnded && !isAd) {
+                // Verify we are actually at the end of the main video
+                const timeRemaining = video.duration - video.currentTime;
+                if (isNaN(timeRemaining) || timeRemaining < 5) {
+                  clearInterval(interval);
+                  resolve('ENDED');
+                }
+              }
+            }
+          } catch(e) {}
         }, 2000);
       });
     })()
