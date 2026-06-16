@@ -289,6 +289,14 @@
 					"array": false,
 					"default": null,
 					"encrypt": false
+				},
+				{
+					"key": "userAgent",
+					"type": "text",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
 				}
 			],
 			"indexes": []

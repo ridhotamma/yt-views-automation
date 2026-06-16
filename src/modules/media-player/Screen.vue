@@ -19,6 +19,7 @@
           :youtubeUrls="player.youtubeUrls"
           :currentQueue="player.currentQueue"
           :proxyIp="player.proxyIp"
+          :userAgent="player.userAgent"
           @stop="stopPlayer"
           @update:currentQueue="(val) => handleUpdateQueue(player, val)"
         />
@@ -31,10 +32,14 @@
 
     <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
       <div class="url-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
-        <div style="margin-bottom: 0.5rem;">
-          <FloatLabel variant="on">
+        <div style="margin-bottom: 0.5rem; display: flex; gap: 1rem;">
+          <FloatLabel variant="on" style="flex: 1;">
             <Select id="proxy-select" v-model="selectedProxyId" :options="proxiesList" optionLabel="name" optionValue="id" style="width: 100%" showClear />
             <label for="proxy-select">Proxy (Optional)</label>
+          </FloatLabel>
+          <FloatLabel variant="on" style="flex: 1;">
+            <Select id="ua-select" v-model="selectedUaType" :options="uaOptions" optionLabel="label" optionValue="value" style="width: 100%" />
+            <label for="ua-select">Device / User Agent</label>
           </FloatLabel>
         </div>
 
@@ -80,6 +85,7 @@ import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
 import { databases, ID, Query } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
+import { generateUserAgent } from "../../utils/userAgent.js";
 
 const isModalVisible = ref(false);
 const isLoading = ref(true);
@@ -88,6 +94,14 @@ const queueList = ref([""]);
 const formError = ref("");
 const selectedProxyId = ref(null);
 const proxiesList = ref([]);
+const selectedUaType = ref("random");
+const uaOptions = ref([
+	{ label: "Random (Any)", value: "random" },
+	{ label: "Windows Desktop", value: "windows" },
+	{ label: "macOS Desktop", value: "macos" },
+	{ label: "iPhone Mobile", value: "iphone" },
+	{ label: "Android Mobile", value: "android" }
+]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 
@@ -120,6 +134,7 @@ onMounted(async () => {
 					userId: doc.userId,
 					proxyId: doc.proxyId,
 					proxyIp: proxy ? proxy.ipAddress : null,
+					userAgent: doc.userAgent,
 				};
 			});
 		}
@@ -134,6 +149,7 @@ const resetForm = () => {
 	queueList.value = [""];
 	formError.value = "";
 	selectedProxyId.value = null;
+	selectedUaType.value = "random";
 };
 
 const startPlayer = async () => {
@@ -159,6 +175,9 @@ const startPlayer = async () => {
 	}
 
 	try {
+		const uaType = selectedUaType.value === "random" ? null : selectedUaType.value;
+		const uaString = generateUserAgent(uaType);
+
 		const doc = await databases.createDocument(
 			dbId,
 			collectionId,
@@ -168,6 +187,7 @@ const startPlayer = async () => {
 				userId: currentUser.value.$id,
 				currentQueue: 0,
 				proxyId: selectedProxyId.value || null,
+				userAgent: uaString,
 			},
 		);
 
@@ -180,6 +200,7 @@ const startPlayer = async () => {
 			currentQueue: doc.currentQueue,
 			proxyId: doc.proxyId,
 			proxyIp: proxy ? proxy.ipAddress : null,
+			userAgent: doc.userAgent,
 		});
 
 		isModalVisible.value = false;

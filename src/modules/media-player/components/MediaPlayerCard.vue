@@ -3,8 +3,9 @@
     <!-- Top Section: Webview -->
     <div class="webview-container" v-if="currentVideo && isProxyReady">
       <webview 
-        :src="currentVideo" 
+        ref="webviewRef"
         :partition="partitionName"
+        :useragent="userAgent"
         style="width: 100%; height: 100%; border: none;"
         webpreferences="autoplayPolicy=no-user-gesture-required"
         @dom-ready="onDomReady"
@@ -16,9 +17,15 @@
 
     <!-- Bottom Section: Controls -->
     <div class="controls-bar">
-      <div class="queue-info" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true">
-        <i class="pi pi-list"></i>
-        <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <div class="queue-info" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true">
+          <i class="pi pi-list"></i>
+          <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
+        </div>
+        <div v-if="userAgent" class="queue-info" v-tooltip.top="userAgent" style="cursor: help;">
+          <i class="pi pi-desktop"></i>
+          <span>Spoofed</span>
+        </div>
       </div>
       <Button 
         icon="pi pi-trash" 
@@ -58,7 +65,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 
@@ -67,6 +74,7 @@ const props = defineProps({
 	youtubeUrls: Array,
 	currentQueue: Number,
 	proxyIp: String,
+	userAgent: String,
 });
 
 const emit = defineEmits(["stop", "update:currentQueue"]);
@@ -79,10 +87,15 @@ const currentVideo = computed(
 const isQueueModalVisible = ref(false);
 const isDeleteModalVisible = ref(false);
 const isProxyReady = ref(false);
+const webviewRef = ref(null);
 
 const partitionName = computed(() => `persist:player-${props.id}`);
 
-import { onMounted } from "vue";
+watch(currentVideo, (newVideo) => {
+	if (newVideo && webviewRef.value) {
+		webviewRef.value.src = newVideo;
+	}
+});
 onMounted(async () => {
 	if (props.proxyIp && window.ipcRenderer) {
 		try {
@@ -96,6 +109,12 @@ onMounted(async () => {
 		}
 	}
 	isProxyReady.value = true;
+	
+	nextTick(() => {
+		if (webviewRef.value && currentVideo.value) {
+			webviewRef.value.src = currentVideo.value;
+		}
+	});
 });
 
 const playNext = () => {
