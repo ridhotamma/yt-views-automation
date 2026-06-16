@@ -2,9 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import MediaPlayerScreen from "../modules/media-player/Screen.vue";
 import ProxyScreen from "../modules/proxy/Screen.vue";
 import LoginScreen from "../modules/auth/Screen.vue";
-import RegisterScreen from "../modules/auth/Register.vue";
-import ForgotPasswordScreen from "../modules/auth/ForgotPassword.vue";
-import ResetPasswordScreen from "../modules/auth/ResetPassword.vue";
 import { account } from "../lib/appwrite";
 
 const router = createRouter({
@@ -14,24 +11,6 @@ const router = createRouter({
 			path: "/login",
 			name: "login",
 			component: LoginScreen,
-			meta: { requiresGuest: true },
-		},
-		{
-			path: "/register",
-			name: "register",
-			component: RegisterScreen,
-			meta: { requiresGuest: true },
-		},
-		{
-			path: "/forgot-password",
-			name: "forgot-password",
-			component: ForgotPasswordScreen,
-			meta: { requiresGuest: true },
-		},
-		{
-			path: "/reset-password",
-			name: "reset-password",
-			component: ResetPasswordScreen,
 			meta: { requiresGuest: true },
 		},
 		{

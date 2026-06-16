@@ -1,5 +1,5 @@
 <template>
-  <div v-if="['login', 'register', 'forgot-password', 'reset-password'].includes($route.name)" class="full-screen">
+  <div v-if="['login'].includes($route.name)" class="full-screen">
     <router-view />
   </div>
 
@@ -72,37 +72,10 @@ const handleLogout = async () => {
 
 onMounted(() => {
 	window.addEventListener("resize", handleResize);
-
-	if (window.ipcRenderer) {
-		window.ipcRenderer.on("deep-link", (event, url) => {
-			try {
-				const urlObj = new URL(url);
-				// youtumate://reset-password
-				if (
-					urlObj.hostname === "reset-password" ||
-					urlObj.pathname.includes("reset-password")
-				) {
-					const params = new URLSearchParams(urlObj.search);
-					router.push({
-						path: "/reset-password",
-						query: {
-							userId: params.get("userId"),
-							secret: params.get("secret"),
-						},
-					});
-				}
-			} catch (err) {
-				console.error("Failed to parse deep link URL", err);
-			}
-		});
-	}
 });
 
 onUnmounted(() => {
 	window.removeEventListener("resize", handleResize);
-	if (window.ipcRenderer) {
-		window.ipcRenderer.off("deep-link");
-	}
 });
 </script>
 
