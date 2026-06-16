@@ -87,7 +87,108 @@
 			"name": "user_subscriptions",
 			"enabled": true,
 			"rowSecurity": false,
-			"columns": [],
+			"columns": [
+				{
+					"key": "userId",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "planId",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "status",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "startDate",
+					"type": "datetime",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "expiredDate",
+					"type": "datetime",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				}
+			],
+			"indexes": []
+		},
+		{
+			"$id": "user_subscription_transactions",
+			"$permissions": [],
+			"databaseId": "6a31a1b80021df02203f",
+			"name": "user_subscription_transactions",
+			"enabled": true,
+			"rowSecurity": false,
+			"columns": [
+				{
+					"key": "userId",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "planId",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "amount",
+					"type": "bigint",
+					"required": true,
+					"array": false,
+					"default": null,
+					"min": 0,
+					"max": 9223372036854775807
+				},
+				{
+					"key": "transactionDate",
+					"type": "datetime",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "status",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "referenceId",
+					"type": "text",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				}
+			],
 			"indexes": []
 		},
 		{
@@ -158,9 +259,34 @@
 					"default": null,
 					"min": 0,
 					"max": 9223372036854775807
+				},
+				{
+					"key": "features",
+					"type": "text",
+					"required": false,
+					"array": true,
+					"default": null,
+					"encrypt": false
 				}
 			],
 			"indexes": []
+		}
+	],
+	"functions": [
+		{
+			"$id": "check_expired_subscriptions",
+			"name": "check_expired_subscriptions",
+			"runtime": "node-21.0",
+			"execute": [],
+			"events": [],
+			"schedule": "0 0 * * *",
+			"timeout": 15,
+			"enabled": true,
+			"logging": true,
+			"entrypoint": "src/index.js",
+			"commands": "npm install",
+			"scopes": ["databases.read", "databases.write"],
+			"path": "functions/check-expired-subscriptions"
 		}
 	]
 }
