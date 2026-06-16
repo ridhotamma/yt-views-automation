@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen } from "electron";
+import { app, BrowserWindow, ipcMain, screen, session } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -99,29 +99,29 @@ function createWindow() {
 
 	// Intercept Appwrite OAuth navigation
 	win.webContents.on("will-navigate", (event, url) => {
-		const isExternal = VITE_DEV_SERVER_URL 
+		const isExternal = VITE_DEV_SERVER_URL
 			? !url.startsWith(VITE_DEV_SERVER_URL)
 			: !url.startsWith("file://");
 
 		if (isExternal && url.includes("account/sessions/oauth2")) {
 			event.preventDefault();
-			
+
 			const authWin = new BrowserWindow({
 				width: 600,
 				height: 700,
 				webPreferences: {
 					nodeIntegration: false,
 					contextIsolation: true,
-				}
+				},
 			});
 
 			authWin.loadURL(url);
 
 			const handleRedirect = (e, newUrl) => {
-				const isInternal = VITE_DEV_SERVER_URL 
+				const isInternal = VITE_DEV_SERVER_URL
 					? newUrl.startsWith(VITE_DEV_SERVER_URL)
 					: newUrl.startsWith("file://") || newUrl.startsWith("youtumate://");
-					
+
 				if (isInternal) {
 					e.preventDefault();
 					authWin.close();
@@ -140,6 +140,18 @@ function createWindow() {
 		win.loadFile(join(process.env.DIST, "index.html"));
 	}
 }
+
+ipcMain.handle("set-proxy", async (event, partition, proxyRules) => {
+	try {
+		const ses = session.fromPartition(partition);
+		await ses.setProxy({ proxyRules });
+		console.log(`[Proxy] Set ${proxyRules} for ${partition}`);
+		return true;
+	} catch (err) {
+		console.error(`[Proxy] Failed to set proxy for ${partition}:`, err);
+		return false;
+	}
+});
 
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {

@@ -281,6 +281,14 @@
 					"default": 0,
 					"min": 0,
 					"max": 9999
+				},
+				{
+					"key": "proxyId",
+					"type": "text",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
 				}
 			],
 			"indexes": []

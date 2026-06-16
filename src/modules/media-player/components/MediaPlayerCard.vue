@@ -1,9 +1,10 @@
 <template>
   <div class="player-card">
     <!-- Top Section: Webview -->
-    <div class="webview-container" v-if="currentVideo">
+    <div class="webview-container" v-if="currentVideo && isProxyReady">
       <webview 
         :src="currentVideo" 
+        :partition="partitionName"
         style="width: 100%; height: 100%; border: none;"
         webpreferences="autoplayPolicy=no-user-gesture-required"
         @dom-ready="onDomReady"
@@ -65,6 +66,7 @@ const props = defineProps({
 	id: String,
 	youtubeUrls: Array,
 	currentQueue: Number,
+	proxyIp: String,
 });
 
 const emit = defineEmits(["stop", "update:currentQueue"]);
@@ -76,6 +78,25 @@ const currentVideo = computed(
 
 const isQueueModalVisible = ref(false);
 const isDeleteModalVisible = ref(false);
+const isProxyReady = ref(false);
+
+const partitionName = computed(() => `persist:player-${props.id}`);
+
+import { onMounted } from "vue";
+onMounted(async () => {
+	if (props.proxyIp && window.ipcRenderer) {
+		try {
+			await window.ipcRenderer.invoke(
+				"set-proxy",
+				partitionName.value,
+				props.proxyIp,
+			);
+		} catch (err) {
+			console.error("Failed to set proxy", err);
+		}
+	}
+	isProxyReady.value = true;
+});
 
 const playNext = () => {
 	if (currentIndex.value < props.youtubeUrls.length) {

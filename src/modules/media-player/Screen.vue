@@ -18,6 +18,7 @@
           :id="player.id"
           :youtubeUrls="player.youtubeUrls"
           :currentQueue="player.currentQueue"
+          :proxyIp="player.proxyIp"
           @stop="stopPlayer"
           @update:currentQueue="(val) => handleUpdateQueue(player, val)"
         />
@@ -45,7 +46,13 @@
             @click="queueList.splice(index, 1)" 
           />
         </div>
-        
+        <div style="margin-top: 1rem;">
+          <FloatLabel variant="on">
+            <Select id="proxy-select" v-model="selectedProxyId" :options="proxiesList" optionLabel="name" optionValue="id" style="width: 100%" showClear />
+            <label for="proxy-select">Proxy (Optional)</label>
+          </FloatLabel>
+        </div>
+
         <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
 
         <Button label="Add New URL" icon="pi pi-plus" outlined style="width: 100%; margin-top: 0.5rem;" @click="queueList.push('')" />
@@ -67,6 +74,7 @@ import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Skeleton from "primevue/skeleton";
+import Select from "primevue/select";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
 import { databases, ID, Query } from "../../lib/appwrite.js";
@@ -77,6 +85,8 @@ const isLoading = ref(true);
 const players = ref([]);
 const queueList = ref([""]);
 const formError = ref("");
+const selectedProxyId = ref(null);
+const proxiesList = ref([]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 
@@ -89,16 +99,28 @@ onMounted(async () => {
 		await authStore.initAuth();
 
 		if (currentUser.value) {
+			const proxyRes = await databases.listDocuments(dbId, "proxies");
+			proxiesList.value = proxyRes.documents.map((doc) => ({
+				id: doc.$id,
+				name: doc.name,
+				ipAddress: doc.ipAddress,
+			}));
+
 			const res = await databases.listDocuments(dbId, collectionId, [
 				Query.equal("userId", currentUser.value.$id),
 			]);
 
-			players.value = res.documents.map((doc) => ({
-				id: doc.$id,
-				youtubeUrls: doc.youtubeUrls,
-				currentQueue: doc.currentQueue,
-				userId: doc.userId,
-			}));
+			players.value = res.documents.map((doc) => {
+				const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+				return {
+					id: doc.$id,
+					youtubeUrls: doc.youtubeUrls,
+					currentQueue: doc.currentQueue,
+					userId: doc.userId,
+					proxyId: doc.proxyId,
+					proxyIp: proxy ? proxy.ipAddress : null,
+				};
+			});
 		}
 	} catch (e) {
 		console.error("Failed to fetch players", e);
@@ -110,6 +132,7 @@ onMounted(async () => {
 const resetForm = () => {
 	queueList.value = [""];
 	formError.value = "";
+	selectedProxyId.value = null;
 };
 
 const startPlayer = async () => {
@@ -143,14 +166,19 @@ const startPlayer = async () => {
 				youtubeUrls: urls,
 				userId: currentUser.value.$id,
 				currentQueue: 0,
+				proxyId: selectedProxyId.value || null,
 			},
 		);
+
+		const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
 
 		players.value.push({
 			id: doc.$id,
 			youtubeUrls: doc.youtubeUrls,
 			userId: doc.userId,
 			currentQueue: doc.currentQueue,
+			proxyId: doc.proxyId,
+			proxyIp: proxy ? proxy.ipAddress : null,
 		});
 
 		isModalVisible.value = false;

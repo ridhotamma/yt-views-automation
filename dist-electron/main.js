@@ -1,4 +1,4 @@
-import { BrowserWindow, app, screen } from "electron";
+import { BrowserWindow, app, ipcMain, screen, session } from "electron";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 //#region electron/main.js
@@ -77,6 +77,16 @@ function createWindow() {
 	if (VITE_DEV_SERVER_URL) win.loadURL(VITE_DEV_SERVER_URL);
 	else win.loadFile(join(process.env.DIST, "index.html"));
 }
+ipcMain.handle("set-proxy", async (event, partition, proxyRules) => {
+	try {
+		await session.fromPartition(partition).setProxy({ proxyRules });
+		console.log(`[Proxy] Set ${proxyRules} for ${partition}`);
+		return true;
+	} catch (err) {
+		console.error(`[Proxy] Failed to set proxy for ${partition}:`, err);
+		return false;
+	}
+});
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {
 		app.quit();

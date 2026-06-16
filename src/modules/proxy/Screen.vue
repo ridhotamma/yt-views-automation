@@ -48,36 +48,39 @@
 
     <!-- Create/Edit Modal -->
     <Dialog v-model:visible="isModalVisible" modal :header="modalMode === 'create' ? 'Create New Proxy' : 'Edit Proxy'" :style="{ width: '450px' }" @hide="resetForm">
-      <div class="form-container" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
+      <Form id="proxyForm" :resolver="resolver" :initialValues="form" @submit="onFormSubmit" class="form-container" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
         <div>
-          <FloatLabel variant="on">
-            <InputText id="proxy-name" v-model="form.name" :invalid="!!errors.name" style="width: 100%" autocomplete="off" @input="errors.name = ''" />
-            <label for="proxy-name">Name</label>
-          </FloatLabel>
-          <Message v-if="errors.name" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ errors.name }}</Message>
+          <FormField name="name" v-slot="$field">
+            <FloatLabel variant="on">
+              <InputText id="proxy-name" name="name" v-model="form.name" :invalid="$field?.invalid" style="width: 100%" autocomplete="off" />
+              <label for="proxy-name">Name</label>
+            </FloatLabel>
+            <Message v-if="$field?.invalid" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ $field.error?.message }}</Message>
+          </FormField>
         </div>
         
         <div>
-          <FloatLabel variant="on">
-            <InputText id="proxy-ip" v-model="form.ipAddress" :invalid="!!errors.ipAddress" style="width: 100%" autocomplete="off" @input="errors.ipAddress = ''" />
-            <label for="proxy-ip">IP Address (e.g. 192.168.1.1:8080)</label>
-          </FloatLabel>
-          <Message v-if="errors.ipAddress" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ errors.ipAddress }}</Message>
+          <FormField name="ipAddress" v-slot="$field">
+            <FloatLabel variant="on">
+              <InputText id="proxy-ip" name="ipAddress" v-model="form.ipAddress" :invalid="$field?.invalid" style="width: 100%" autocomplete="off" />
+              <label for="proxy-ip">IP Address (e.g. 192.168.1.1:8080)</label>
+            </FloatLabel>
+            <Message v-if="$field?.invalid" severity="error" size="small" variant="simple" style="margin-top: 0.25rem">{{ $field.error?.message }}</Message>
+          </FormField>
         </div>
 
         <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
-      </div>
+      </Form>
 
       <template #footer>
         <Button label="Cancel" text severity="secondary" @click="isModalVisible = false" autofocus />
-        <Button :label="modalMode === 'create' ? 'Create' : 'Save'" @click="saveProxy" />
+        <Button :label="modalMode === 'create' ? 'Create' : 'Save'" type="submit" form="proxyForm" />
       </template>
     </Dialog>
 
     <!-- Delete Confirmation Modal -->
     <Dialog v-model:visible="isDeleteModalVisible" modal header="Confirm Delete" :style="{ width: '350px' }">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--p-red-500)"></i>
         <span>Are you sure you want to delete <b>{{ proxyToDelete?.name }}</b>?</span>
       </div>
       <template #footer>
@@ -98,6 +101,7 @@ import Message from "primevue/message";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Skeleton from "primevue/skeleton";
+import { Form, FormField } from "@primevue/forms";
 import { databases, ID } from "../../lib/appwrite.js";
 import { proxyRegex } from "../../constants/validator.js";
 
@@ -108,7 +112,6 @@ const skeletonData = ref(Array.from({ length: 5 }));
 const isModalVisible = ref(false);
 const modalMode = ref("create"); // 'create' or 'edit'
 const form = ref({ id: null, name: "", ipAddress: "" });
-const errors = ref({ name: "", ipAddress: "" });
 const formError = ref("");
 
 const isDeleteModalVisible = ref(false);
@@ -140,7 +143,6 @@ onMounted(() => {
 const openCreateModal = () => {
 	modalMode.value = "create";
 	form.value = { id: null, name: "", ipAddress: "" };
-	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 	isModalVisible.value = true;
 };
@@ -148,37 +150,33 @@ const openCreateModal = () => {
 const openEditModal = (proxy) => {
 	modalMode.value = "edit";
 	form.value = { ...proxy };
-	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 	isModalVisible.value = true;
 };
 
 const resetForm = () => {
 	form.value = { id: null, name: "", ipAddress: "" };
-	errors.value = { name: "", ipAddress: "" };
 	formError.value = "";
 };
 
-const saveProxy = async () => {
+const resolver = ({ values }) => {
+	const errors = {};
+	if (!values.name || !values.name.trim()) {
+		errors.name = [{ message: "Name is required." }];
+	}
+	if (!values.ipAddress || !values.ipAddress.trim()) {
+		errors.ipAddress = [{ message: "IP Address is required." }];
+	} else if (!proxyRegex.test(values.ipAddress.trim())) {
+		errors.ipAddress = [
+			{ message: "Invalid Proxy format. Use domain.com or IP:Port." },
+		];
+	}
+	return { errors };
+};
+
+const onFormSubmit = async ({ valid }) => {
+	if (!valid) return;
 	formError.value = "";
-	errors.value = { name: "", ipAddress: "" };
-
-	let isValid = true;
-
-	if (!form.value.name.trim()) {
-		errors.value.name = "Name is required.";
-		isValid = false;
-	}
-
-	if (!form.value.ipAddress.trim()) {
-		errors.value.ipAddress = "IP Address is required.";
-		isValid = false;
-	} else if (!proxyRegex.test(form.value.ipAddress.trim())) {
-		errors.value.ipAddress = "Invalid Proxy format. Use domain.com or IP:Port.";
-		isValid = false;
-	}
-
-	if (!isValid) return;
 
 	try {
 		if (modalMode.value === "create") {
@@ -189,7 +187,7 @@ const saveProxy = async () => {
 				{
 					name: form.value.name.trim(),
 					ipAddress: form.value.ipAddress.trim(),
-				}
+				},
 			);
 			proxies.value.push({
 				id: doc.$id,
@@ -201,7 +199,7 @@ const saveProxy = async () => {
 				name: form.value.name.trim(),
 				ipAddress: form.value.ipAddress.trim(),
 			});
-			const index = proxies.value.findIndex(p => p.id === form.value.id);
+			const index = proxies.value.findIndex((p) => p.id === form.value.id);
 			if (index !== -1) {
 				proxies.value[index] = { ...form.value };
 			}
@@ -224,7 +222,9 @@ const deleteProxy = async () => {
 
 	try {
 		await databases.deleteDocument(dbId, collectionId, proxyToDelete.value.id);
-		proxies.value = proxies.value.filter((p) => p.id !== proxyToDelete.value.id);
+		proxies.value = proxies.value.filter(
+			(p) => p.id !== proxyToDelete.value.id,
+		);
 		isDeleteModalVisible.value = false;
 		proxyToDelete.value = null;
 	} catch (e) {
