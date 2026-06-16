@@ -1,4 +1,4 @@
-import { Client, Account } from "appwrite";
+import { Client, Account, Databases, ID, Query } from "appwrite";
 
 const client = new Client()
 	.setEndpoint(
@@ -7,4 +7,5 @@ const client = new Client()
 	.setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
 
 export const account = new Account(client);
-export { client };
+export const databases = new Databases(client);
+export { client, ID, Query };

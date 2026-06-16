@@ -14,7 +14,7 @@
         :youtubeUrls="player.youtubeUrls"
         :currentQueue="player.currentQueue"
         @stop="stopPlayer"
-        @update:currentQueue="(val) => player.currentQueue = val"
+        @update:currentQueue="(val) => handleUpdateQueue(player, val)"
       />
       <div v-if="players.length === 0" class="empty-state">
         <i class="pi pi-video empty-icon"></i>
@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import FloatLabel from "primevue/floatlabel";
@@ -67,12 +67,36 @@ import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
+import { account, databases, ID, Query } from "../../lib/appwrite.js";
 
 const isModalVisible = ref(false);
 const players = ref([]);
 const playerName = ref("");
 const queueList = ref([""]);
 const formError = ref("");
+const currentUser = ref(null);
+
+const dbId = "6a31a1b80021df02203f";
+const collectionId = "media_players";
+
+onMounted(async () => {
+	try {
+		currentUser.value = await account.get();
+		const res = await databases.listDocuments(dbId, collectionId, [
+			Query.equal("userId", currentUser.value.$id),
+		]);
+
+		players.value = res.documents.map((doc) => ({
+			id: doc.$id,
+			name: doc.name,
+			youtubeUrls: doc.youtubeUrls,
+			currentQueue: doc.currentQueue,
+			userId: doc.userId,
+		}));
+	} catch (e) {
+		console.error("Not logged in or failed to fetch players", e);
+	}
+});
 
 const resetForm = () => {
 	playerName.value = "";
@@ -80,7 +104,7 @@ const resetForm = () => {
 	formError.value = "";
 };
 
-const startPlayer = () => {
+const startPlayer = async () => {
 	formError.value = "";
 
 	if (!playerName.value.trim()) {
@@ -102,20 +126,58 @@ const startPlayer = () => {
 		}
 	}
 
-	players.value.push({
-		id: crypto.randomUUID(),
-		name: playerName.value.trim(),
-		youtubeUrls: urls,
-		userId: "anonymous",
-		currentQueue: 0,
-	});
+	if (!currentUser.value) {
+		formError.value = "You must be logged in to create a player.";
+		return;
+	}
 
-	isModalVisible.value = false;
-	resetForm(); // Reset for next time
+	try {
+		const doc = await databases.createDocument(
+			dbId,
+			collectionId,
+			ID.unique(),
+			{
+				name: playerName.value.trim(),
+				youtubeUrls: urls,
+				userId: currentUser.value.$id,
+				currentQueue: 0,
+			},
+		);
+
+		players.value.push({
+			id: doc.$id,
+			name: doc.name,
+			youtubeUrls: doc.youtubeUrls,
+			userId: doc.userId,
+			currentQueue: doc.currentQueue,
+		});
+
+		isModalVisible.value = false;
+		resetForm();
+	} catch (e) {
+		console.error(e);
+		formError.value = "Failed to save player. " + e.message;
+	}
 };
 
-const stopPlayer = (id) => {
-	players.value = players.value.filter((p) => p.id !== id);
+const stopPlayer = async (id) => {
+	try {
+		await databases.deleteDocument(dbId, collectionId, id);
+		players.value = players.value.filter((p) => p.id !== id);
+	} catch (e) {
+		console.error("Failed to delete player", e);
+	}
+};
+
+const handleUpdateQueue = async (player, newQueue) => {
+	player.currentQueue = newQueue;
+	try {
+		await databases.updateDocument(dbId, collectionId, player.id, {
+			currentQueue: newQueue,
+		});
+	} catch (e) {
+		console.error("Failed to update queue", e);
+	}
 };
 </script>
 
