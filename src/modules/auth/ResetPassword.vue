@@ -69,6 +69,17 @@ onMounted(() => {
 	userId.value = route.query.userId || "";
 	secret.value = route.query.secret || "";
 
+	// Check if this page is opened in a standard web browser (like Chrome/Safari)
+	// by checking the user agent. Electron adds "Electron" to the user agent.
+	const isElectron = /electron/i.test(navigator.userAgent);
+
+	if (!isElectron && userId.value && secret.value) {
+		// If opened in a regular browser (from the email), redirect to the deep link!
+		// This will prompt the OS to open the actual Electron app.
+		window.location.href = `youtumate://reset-password?userId=${userId.value}&secret=${secret.value}`;
+		return;
+	}
+
 	if (!userId.value || !secret.value) {
 		authError.value = "Invalid password reset link. Please request a new one.";
 	}
