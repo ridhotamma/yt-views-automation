@@ -18,4 +18,6 @@ app.use(PrimeVue, {
 })
 app.directive('tooltip', Tooltip)
 
-app.mount('#app')
+router.isReady().then(() => {
+  app.mount('#app')
+})

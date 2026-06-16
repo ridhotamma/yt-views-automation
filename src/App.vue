@@ -1,10 +1,5 @@
 <template>
-  <!-- Global Loader -->
-  <div v-if="isInitializing" class="global-loader">
-    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-  </div>
-
-  <div v-else-if="$route.name === 'login'" class="full-screen">
+  <div v-if="$route.name === 'login'" class="full-screen">
     <router-view />
   </div>
 
@@ -57,7 +52,6 @@ import { account } from './lib/appwrite'
 const router = useRouter()
 const route = useRoute()
 const isCollapsed = ref(window.innerWidth <= 1024)
-const isInitializing = ref(true)
 
 const handleResize = () => {
   if (window.innerWidth <= 1024) {
@@ -76,16 +70,8 @@ const handleLogout = async () => {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener('resize', handleResize)
-  // Verify auth session before showing app layout to prevent flicker
-  try {
-    await account.get()
-  } catch {
-    // If we fail and we are on a protected route, router.beforeEach handles redirect
-  } finally {
-    isInitializing.value = false
-  }
 })
 
 onUnmounted(() => {
