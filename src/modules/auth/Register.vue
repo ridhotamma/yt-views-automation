@@ -6,54 +6,64 @@
           <img src="/images/logo.png" alt="Logo" class="auth-logo" />
           <span class="brand-title font-britney">Youtumate</span>
         </div>
-        <h2>Welcome back</h2>
-        <p>Sign in to your Youtumate account</p>
+        <h2>Create an account</h2>
+        <p>Sign up to start using Youtumate</p>
       </div>
 
-        <Form :resolver="resolver" @submit="onFormSubmit" class="auth-form" v-slot="$form">
-          <div class="input-group">
-            <FloatLabel variant="on">
-              <InputText id="email" name="email" type="email" style="width: 100%" autocomplete="email" />
-              <label for="email">Email address</label>
-            </FloatLabel>
-            <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
-              {{ $form.email.error?.message }}
-            </Message>
-          </div>
-
-          <div class="input-group">
-            <FloatLabel variant="on">
-              <InputText id="password" name="password" type="password" style="width: 100%" autocomplete="current-password" />
-              <label for="password">Password</label>
-            </FloatLabel>
-            <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
-              {{ $form.password.error?.message }}
-            </Message>
-          </div>
-
-          <Message v-if="authError" severity="error" size="small" variant="simple">{{ authError }}</Message>
-
-          <Button type="submit" label="Sign in" class="w-full" :loading="isLoading" />
-        </Form>
-
-        <div class="divider">
-          <span>or</span>
+      <Form :resolver="resolver" @submit="onFormSubmit" class="auth-form" v-slot="$form">
+        <div class="input-group">
+          <FloatLabel variant="on">
+            <InputText id="name" name="name" type="text" style="width: 100%" autocomplete="name" />
+            <label for="name">Full Name</label>
+          </FloatLabel>
+          <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">
+            {{ $form.name.error?.message }}
+          </Message>
         </div>
 
-        <Button label="Sign in with Google" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
-
-        <div class="auth-footer">
-          <p>Don't have an account? <router-link to="/register" class="auth-link">Sign up</router-link></p>
+        <div class="input-group">
+          <FloatLabel variant="on">
+            <InputText id="email" name="email" type="email" style="width: 100%" autocomplete="email" />
+            <label for="email">Email address</label>
+          </FloatLabel>
+          <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
+            {{ $form.email.error?.message }}
+          </Message>
         </div>
+
+        <div class="input-group">
+          <FloatLabel variant="on">
+            <InputText id="password" name="password" type="password" style="width: 100%" autocomplete="new-password" />
+            <label for="password">Password</label>
+          </FloatLabel>
+          <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
+            {{ $form.password.error?.message }}
+          </Message>
+        </div>
+
+        <Message v-if="authError" severity="error" size="small" variant="simple">{{ authError }}</Message>
+
+        <Button type="submit" label="Sign up" class="w-full" :loading="isLoading" />
+      </Form>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <Button label="Sign in with Google" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
+
+      <div class="auth-footer">
+        <p>Already have an account? <router-link to="/login" class="auth-link">Sign in</router-link></p>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { account } from '../../lib/appwrite'
-import { OAuthProvider } from 'appwrite'
+import { OAuthProvider, ID } from 'appwrite'
 
 import { Form } from '@primevue/forms'
 import Button from 'primevue/button'
@@ -67,6 +77,10 @@ const authError = ref('')
 
 const resolver = ({ values }) => {
   const errors = {}
+
+  if (!values.name || values.name.trim() === '') {
+    errors.name = [{ message: 'Name is required' }]
+  }
 
   if (!values.email) {
     errors.email = [{ message: 'Email is required' }]
@@ -90,10 +104,17 @@ const onFormSubmit = async (e) => {
   authError.value = ''
 
   try {
-    await account.createEmailPasswordSession(e.states.email.value, e.states.password.value)
+    const email = e.states.email.value
+    const password = e.states.password.value
+    const name = e.states.name.value
+    
+    // Register the user
+    await account.create(ID.unique(), email, password, name)
+    // Immediately log them in
+    await account.createEmailPasswordSession(email, password)
     router.push('/')
   } catch (error) {
-    authError.value = error.message || 'Failed to login. Please check your credentials.'
+    authError.value = error.message || 'Failed to create account. Please try again.'
   } finally {
     isLoading.value = false
   }
@@ -101,13 +122,13 @@ const onFormSubmit = async (e) => {
 
 const handleGoogleLogin = () => {
   try {
-    const successUrl = window.location.origin + "/";
-    const failureUrl = window.location.origin + "/login";
-    account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
+    const successUrl = window.location.origin + '/'
+    const failureUrl = window.location.origin + '/register'
+    account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl)
   } catch (error) {
-    authError.value = "Failed to initialize Google login.";
+    authError.value = 'Failed to initialize Google login.'
   }
-};
+}
 </script>
 
 <style scoped>
@@ -206,7 +227,7 @@ const handleGoogleLogin = () => {
 
 .divider::before,
 .divider::after {
-  content: "";
+  content: '';
   flex: 1;
   border-bottom: 1px solid var(--p-surface-700, #333);
 }

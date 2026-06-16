@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$route.name === 'login'" class="full-screen">
+  <div v-if="['login', 'register'].includes($route.name)" class="full-screen">
     <router-view />
   </div>
 
