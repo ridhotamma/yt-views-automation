@@ -66,6 +66,7 @@ import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
+import { ytRegex } from "../../constants/validator.js";
 
 const isModalVisible = ref(false);
 const players = ref([]);
@@ -94,8 +95,6 @@ const startPlayer = () => {
 		return;
 	}
 
-	const ytRegex =
-		/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+$/;
 	for (const url of urls) {
 		if (!ytRegex.test(url)) {
 			formError.value = "Invalid YouTube URL: " + url;
