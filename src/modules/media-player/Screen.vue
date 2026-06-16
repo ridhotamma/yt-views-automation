@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import FloatLabel from "primevue/floatlabel";
@@ -67,34 +67,39 @@ import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
-import { account, databases, ID, Query } from "../../lib/appwrite.js";
+import { databases, ID, Query } from "../../lib/appwrite.js";
+import { useAuthStore } from "../../store/auth.js";
 
 const isModalVisible = ref(false);
 const players = ref([]);
 const playerName = ref("");
 const queueList = ref([""]);
 const formError = ref("");
-const currentUser = ref(null);
+const authStore = useAuthStore();
+const currentUser = computed(() => authStore.user);
 
 const dbId = "6a31a1b80021df02203f";
 const collectionId = "media_players";
 
 onMounted(async () => {
 	try {
-		currentUser.value = await account.get();
-		const res = await databases.listDocuments(dbId, collectionId, [
-			Query.equal("userId", currentUser.value.$id),
-		]);
-
-		players.value = res.documents.map((doc) => ({
-			id: doc.$id,
-			name: doc.name,
-			youtubeUrls: doc.youtubeUrls,
-			currentQueue: doc.currentQueue,
-			userId: doc.userId,
-		}));
+		await authStore.initAuth();
+		
+		if (currentUser.value) {
+			const res = await databases.listDocuments(dbId, collectionId, [
+				Query.equal("userId", currentUser.value.$id),
+			]);
+			
+			players.value = res.documents.map((doc) => ({
+				id: doc.$id,
+				name: doc.name,
+				youtubeUrls: doc.youtubeUrls,
+				currentQueue: doc.currentQueue,
+				userId: doc.userId,
+			}));
+		}
 	} catch (e) {
-		console.error("Not logged in or failed to fetch players", e);
+		console.error("Failed to fetch players", e);
 	}
 });
 
