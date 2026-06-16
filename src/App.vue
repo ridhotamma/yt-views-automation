@@ -3,8 +3,8 @@
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="sidebar-header">
+        <img src="/images/logo.png" alt="Logo" class="app-logo" :class="{ 'collapsed': isCollapsed }" />
         <span v-if="!isCollapsed" class="brand-title font-britney">Youtumate</span>
-        <span v-else class="brand-title font-britney collapsed-logo">Y</span>
       </div>
 
       <button class="toggle-btn" @click="isCollapsed = !isCollapsed" v-tooltip.right="isCollapsed ? 'Expand' : 'Collapse'">
@@ -97,8 +97,17 @@ onUnmounted(() => {
   color: var(--p-primary-500, #ef4444);
 }
 
-.collapsed-logo {
-  font-size: 1.75rem;
+.app-logo {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.app-logo.collapsed {
+  margin-right: 0;
   margin: 0 auto;
 }
 

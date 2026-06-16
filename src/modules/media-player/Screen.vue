@@ -2,7 +2,7 @@
   <div class="screen-container">
     <div class="header-actions">
       <h1>Media Player</h1>
-      <Button label="Create New Media Player" icon="pi pi-plus" @click="isModalVisible = true" />
+      <Button label="Create" icon="pi pi-plus" @click="isModalVisible = true" />
     </div>
 
     <div class="players-grid">

@@ -9,12 +9,14 @@ var win;
 var VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 function createWindow() {
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+	const iconPath = join(process.env.VITE_PUBLIC, "/images/favicon.png");
+	if (process.platform === "darwin") app.dock.setIcon(iconPath);
 	win = new BrowserWindow({
 		width: Math.floor(width / 2),
 		height: Math.floor(height * .9),
 		minWidth: Math.floor(width / 2),
 		minHeight: 600,
-		icon: join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+		icon: iconPath,
 		webPreferences: {
 			preload: join(__dirname, "preload.mjs"),
 			webviewTag: true

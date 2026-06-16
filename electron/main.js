@@ -25,12 +25,18 @@ function createWindow() {
   const primaryDisplay = screen.getPrimaryDisplay()
   const { width, height } = primaryDisplay.workAreaSize
 
+  const iconPath = join(process.env.VITE_PUBLIC, '/images/favicon.png')
+  
+  if (process.platform === 'darwin') {
+    app.dock.setIcon(iconPath)
+  }
+
   win = new BrowserWindow({
     width: Math.floor(width / 2),
     height: Math.floor(height * 0.9),
     minWidth: Math.floor(width / 2),
     minHeight: 600,
-    icon: join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: iconPath,
     webPreferences: {
       preload: join(__dirname, 'preload.mjs'),
       webviewTag: true
