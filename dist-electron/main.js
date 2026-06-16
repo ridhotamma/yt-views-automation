@@ -9,8 +9,13 @@ var win;
 var VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 function createWindow() {
 	win = new BrowserWindow({
+		minWidth: 400,
+		minHeight: 600,
 		icon: join(process.env.VITE_PUBLIC, "electron-vite.svg"),
-		webPreferences: { preload: join(__dirname, "preload.js") }
+		webPreferences: {
+			preload: join(__dirname, "preload.mjs"),
+			webviewTag: true
+		}
 	});
 	win.webContents.on("did-finish-load", () => {
 		win?.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
@@ -27,6 +32,8 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
 	if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+	createWindow();
+});
 //#endregion
 export {};

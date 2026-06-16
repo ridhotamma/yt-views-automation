@@ -9,6 +9,13 @@ export default defineConfig({
     electron({
       main: {
         entry: 'electron/main.js',
+        vite: {
+          build: {
+            rollupOptions: {
+              external: ['playwright', 'playwright-core', 'fsevents']
+            }
+          }
+        }
       },
       preload: {
         input: 'electron/preload.js',
