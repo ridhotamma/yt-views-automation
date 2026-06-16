@@ -6,20 +6,27 @@
     </div>
 
     <div class="players-grid">
-      <MediaPlayerCard 
-        v-for="player in players" 
-        :key="player.id" 
-        :id="player.id"
-        :name="player.name"
-        :youtubeUrls="player.youtubeUrls"
-        :currentQueue="player.currentQueue"
-        @stop="stopPlayer"
-        @update:currentQueue="(val) => handleUpdateQueue(player, val)"
-      />
-      <div v-if="players.length === 0" class="empty-state">
-        <i class="pi pi-video empty-icon"></i>
-        <p>No media players running. Create one to get started!</p>
-      </div>
+      <template v-if="isLoading">
+        <div v-for="i in 4" :key="'skel-' + i" class="skeleton-card">
+          <Skeleton width="100%" height="360px" borderRadius="12px" />
+        </div>
+      </template>
+      <template v-else>
+        <MediaPlayerCard 
+          v-for="player in players" 
+          :key="player.id" 
+          :id="player.id"
+          :name="player.name"
+          :youtubeUrls="player.youtubeUrls"
+          :currentQueue="player.currentQueue"
+          @stop="stopPlayer"
+          @update:currentQueue="(val) => handleUpdateQueue(player, val)"
+        />
+        <div v-if="players.length === 0" class="empty-state">
+          <i class="pi pi-video empty-icon"></i>
+          <p>No media players running. Create one to get started!</p>
+        </div>
+      </template>
     </div>
 
     <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
@@ -65,12 +72,14 @@ import Dialog from "primevue/dialog";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
+import Skeleton from "primevue/skeleton";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
 import { databases, ID, Query } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 
 const isModalVisible = ref(false);
+const isLoading = ref(true);
 const players = ref([]);
 const playerName = ref("");
 const queueList = ref([""]);
@@ -82,6 +91,7 @@ const dbId = "6a31a1b80021df02203f";
 const collectionId = "media_players";
 
 onMounted(async () => {
+	isLoading.value = true;
 	try {
 		await authStore.initAuth();
 
@@ -100,6 +110,8 @@ onMounted(async () => {
 		}
 	} catch (e) {
 		console.error("Failed to fetch players", e);
+	} finally {
+		isLoading.value = false;
 	}
 });
 
