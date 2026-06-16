@@ -47,42 +47,48 @@
     },
     "functions": [
         {
-            "$id": "check_expired_subscriptions",
+            "$id": "6a31b55a003c45a4e92b",
             "name": "check_expired_subscriptions",
-            "runtime": "node-25.0",
-            "execute": [],
-            "events": [],
-            "schedule": "0 0 * * *",
-            "timeout": 15,
-            "enabled": true,
-            "logging": true,
-            "entrypoint": "src/index.js",
-            "commands": "npm install",
-            "scopes": [
-                "databases.read",
-                "databases.write"
-            ],
-            "path": "functions/check-expired-subscriptions"
-        },
-        {
-            "$id": "mayar_webhook",
-            "name": "mayar_webhook",
-            "runtime": "node-25.0",
+            "runtime": "node-25",
+            "path": "functions/check-expired-subscriptions",
+            "entrypoint": "src/main.js",
             "execute": [
                 "any"
             ],
+            "enabled": true,
+            "logging": true,
             "events": [],
             "schedule": "",
             "timeout": 15,
-            "enabled": true,
-            "logging": true,
-            "entrypoint": "src/index.js",
             "commands": "npm install",
             "scopes": [
-                "databases.read",
-                "databases.write"
+                "users.read"
             ],
-            "path": "functions/mayar-webhook"
+            "buildSpecification": "s-0.5vcpu-512mb",
+            "runtimeSpecification": "s-0.5vcpu-512mb",
+            "deploymentRetention": 0
+        },
+        {
+            "$id": "6a31b59f00148f93b6bb",
+            "name": "mayar_webhook",
+            "runtime": "node-25",
+            "path": "functions/mayar-webhook",
+            "entrypoint": "src/main.js",
+            "execute": [
+                "any"
+            ],
+            "enabled": true,
+            "logging": true,
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "commands": "npm install",
+            "scopes": [
+                "users.read"
+            ],
+            "buildSpecification": "s-0.5vcpu-512mb",
+            "runtimeSpecification": "s-0.5vcpu-512mb",
+            "deploymentRetention": 0
         }
     ],
     "tablesDB": [

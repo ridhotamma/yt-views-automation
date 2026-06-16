@@ -9,6 +9,8 @@ export default async ({ req, res, log, error }) => {
         log('Received Mayar Webhook');
         
         const body = req.body;
+        log('Request Body: ' + (typeof body === 'object' ? JSON.stringify(body, null, 2) : body));
+        
         
         if (!body || !body.type) {
             return res.json({ success: false, message: 'Invalid payload structure' }, 400);
