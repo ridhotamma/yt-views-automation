@@ -1,5 +1,14 @@
 <template>
-  <div id="app-layout">
+  <!-- Global Loader -->
+  <div v-if="isInitializing" class="global-loader">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+
+  <div v-else-if="$route.name === 'login'" class="full-screen">
+    <router-view />
+  </div>
+
+  <div v-else id="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="sidebar-header">
@@ -22,6 +31,15 @@
           <span v-if="!isCollapsed" class="menu-label">Proxy List</span>
         </router-link>
       </div>
+
+      <div style="flex-grow: 1;"></div>
+
+      <div class="sidebar-footer">
+        <a href="#" class="menu-item logout-btn" @click.prevent="handleLogout" v-tooltip.right="isCollapsed ? 'Logout' : ''">
+          <i class="pi pi-sign-out menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Logout</span>
+        </a>
+      </div>
     </aside>
 
     <!-- Main Content -->
@@ -33,8 +51,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { account } from './lib/appwrite'
 
+const router = useRouter()
+const route = useRoute()
 const isCollapsed = ref(window.innerWidth <= 1024)
+const isInitializing = ref(true)
 
 const handleResize = () => {
   if (window.innerWidth <= 1024) {
@@ -44,8 +67,25 @@ const handleResize = () => {
   }
 }
 
-onMounted(() => {
+const handleLogout = async () => {
+  try {
+    await account.deleteSession('current')
+    router.push('/login')
+  } catch (err) {
+    console.error('Logout failed', err)
+  }
+}
+
+onMounted(async () => {
   window.addEventListener('resize', handleResize)
+  // Verify auth session before showing app layout to prevent flicker
+  try {
+    await account.get()
+  } catch {
+    // If we fail and we are on a protected route, router.beforeEach handles redirect
+  } finally {
+    isInitializing.value = false
+  }
 })
 
 onUnmounted(() => {
@@ -181,5 +221,34 @@ onUnmounted(() => {
   flex: 1;
   background-color: var(--p-surface-950, #121212);
   overflow-y: auto;
+}
+
+.global-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--p-surface-950, #121212);
+  color: var(--p-primary-500, #ef4444);
+}
+
+.full-screen {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar-footer {
+  padding: 1rem 0;
+  border-top: 1px solid var(--p-surface-700, #333);
+}
+
+.logout-btn {
+  color: var(--p-red-400, #f87171);
+}
+
+.logout-btn:hover {
+  background-color: var(--p-red-900, #450a0a);
+  color: var(--p-red-200, #fecaca);
 }
 </style>
