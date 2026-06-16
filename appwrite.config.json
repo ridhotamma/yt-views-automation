@@ -93,7 +93,12 @@
 	"tables": [
 		{
 			"$id": "proxies",
-			"$permissions": [],
+			"$permissions": [
+				"create(\"users\")",
+				"read(\"users\")",
+				"update(\"users\")",
+				"delete(\"users\")"
+			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "proxies",
 			"enabled": true,
@@ -120,7 +125,12 @@
 		},
 		{
 			"$id": "user_subscriptions",
-			"$permissions": [],
+			"$permissions": [
+				"create(\"users\")",
+				"read(\"users\")",
+				"update(\"users\")",
+				"delete(\"users\")"
+			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscriptions",
 			"enabled": true,
@@ -171,7 +181,12 @@
 		},
 		{
 			"$id": "user_subscription_transactions",
-			"$permissions": [],
+			"$permissions": [
+				"create(\"users\")",
+				"read(\"users\")",
+				"update(\"users\")",
+				"delete(\"users\")"
+			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscription_transactions",
 			"enabled": true,
@@ -272,7 +287,12 @@
 		},
 		{
 			"$id": "subscription_plans",
-			"$permissions": [],
+			"$permissions": [
+				"create(\"users\")",
+				"read(\"users\")",
+				"update(\"users\")",
+				"delete(\"users\")"
+			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "subscription_plans",
 			"enabled": true,
