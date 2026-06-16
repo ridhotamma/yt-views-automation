@@ -30,12 +30,32 @@
       <div style="flex-grow: 1;"></div>
 
       <div class="sidebar-footer">
-        <a href="#" class="menu-item logout-btn" @click.prevent="handleLogout" v-tooltip.right="isCollapsed ? 'Logout' : ''">
-          <i class="pi pi-sign-out menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Logout</span>
-        </a>
+        <div class="user-profile" @click="togglePopover" :class="{ 'collapsed': isCollapsed }" v-if="currentUser">
+          <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'User') + '&background=random'" alt="Avatar" class="user-avatar" />
+          <div class="user-info" v-if="!isCollapsed">
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-email">{{ currentUser.email }}</span>
+          </div>
+        </div>
       </div>
     </aside>
+
+    <Popover ref="popover">
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
+        <a href="#" class="popover-item logout-btn" @click.prevent="confirmLogout">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </Popover>
+
+    <Dialog v-model:visible="isLogoutModalVisible" modal header="Confirm Logout" :style="{ width: '400px' }">
+      <p class="m-0">Are you sure you want to logout from your account?</p>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" text severity="secondary" @click="isLogoutModalVisible = false" autofocus />
+        <Button label="Logout" icon="pi pi-sign-out" severity="danger" @click="proceedLogout" />
+      </template>
+    </Dialog>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -45,13 +65,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { account } from "./lib/appwrite";
+import { useAuthStore } from "./store/auth";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import Popover from "primevue/popover";
 
 const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(window.innerWidth <= 1024);
+const authStore = useAuthStore();
+const currentUser = computed(() => authStore.user);
+
+const popover = ref();
+const isLogoutModalVisible = ref(false);
 
 const handleResize = () => {
 	if (window.innerWidth <= 1024) {
@@ -61,17 +90,29 @@ const handleResize = () => {
 	}
 };
 
-const handleLogout = async () => {
+const togglePopover = (event) => {
+	popover.value.toggle(event);
+};
+
+const confirmLogout = () => {
+	isLogoutModalVisible.value = true;
+	popover.value.hide();
+};
+
+const proceedLogout = async () => {
 	try {
 		await account.deleteSession("current");
+		authStore.clearUser();
+		isLogoutModalVisible.value = false;
 		router.push("/login");
 	} catch (err) {
 		console.error("Logout failed", err);
 	}
 };
 
-onMounted(() => {
+onMounted(async () => {
 	window.addEventListener("resize", handleResize);
+	await authStore.initAuth();
 });
 
 onUnmounted(() => {
@@ -225,16 +266,80 @@ onUnmounted(() => {
 }
 
 .sidebar-footer {
-  padding: 1rem 0;
+  padding: 1rem;
   border-top: 1px solid var(--p-surface-700, #333);
 }
 
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-profile:hover {
+  background-color: var(--p-surface-800, #2a2a2a);
+}
+
+.user-profile.collapsed {
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--p-surface-0, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: var(--p-surface-400, #aaa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popover-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.popover-item:hover {
+  background-color: var(--p-surface-100, #f3f4f6);
+}
+
 .logout-btn {
-  color: var(--p-red-400, #f87171);
+  color: var(--p-red-500, #ef4444);
 }
 
 .logout-btn:hover {
-  background-color: var(--p-red-900, #450a0a);
-  color: var(--p-red-200, #fecaca);
+  background-color: var(--p-red-50, #fef2f2);
+  color: var(--p-red-600, #dc2626);
 }
 </style>

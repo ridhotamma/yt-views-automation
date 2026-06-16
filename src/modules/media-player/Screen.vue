@@ -84,12 +84,12 @@ const collectionId = "media_players";
 onMounted(async () => {
 	try {
 		await authStore.initAuth();
-		
+
 		if (currentUser.value) {
 			const res = await databases.listDocuments(dbId, collectionId, [
 				Query.equal("userId", currentUser.value.$id),
 			]);
-			
+
 			players.value = res.documents.map((doc) => ({
 				id: doc.$id,
 				name: doc.name,
