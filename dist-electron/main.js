@@ -8,6 +8,27 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.D
 app.setName("Youtumate");
 var win;
 var VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+if (process.defaultApp) {
+	if (process.argv.length >= 2) app.setAsDefaultProtocolClient("youtumate", process.execPath, [join(process.argv[1])]);
+} else app.setAsDefaultProtocolClient("youtumate");
+var deepLinkUrl = null;
+function handleDeepLink(url) {
+	if (win && win.webContents) win.webContents.send("deep-link", url);
+	else deepLinkUrl = url;
+}
+if (!app.requestSingleInstanceLock()) app.quit();
+else app.on("second-instance", (event, commandLine, workingDirectory) => {
+	if (win) {
+		if (win.isMinimized()) win.restore();
+		win.focus();
+		const url = commandLine.find((arg) => arg.startsWith("youtumate://"));
+		if (url) handleDeepLink(url);
+	}
+});
+app.on("open-url", (event, url) => {
+	event.preventDefault();
+	handleDeepLink(url);
+});
 function createWindow() {
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 	const iconPath = join(process.env.VITE_PUBLIC, "/images/favicon.png");
@@ -25,6 +46,10 @@ function createWindow() {
 	});
 	win.webContents.on("did-finish-load", () => {
 		win?.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+		if (deepLinkUrl) {
+			win.webContents.send("deep-link", deepLinkUrl);
+			deepLinkUrl = null;
+		}
 	});
 	if (VITE_DEV_SERVER_URL) win.loadURL(VITE_DEV_SERVER_URL);
 	else win.loadFile(join(process.env.DIST, "index.html"));

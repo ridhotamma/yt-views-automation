@@ -23,6 +23,46 @@ app.setName('Youtumate')
 let win
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
+// Register deep link protocol
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('youtumate', process.execPath, [join(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('youtumate')
+}
+
+let deepLinkUrl = null
+
+function handleDeepLink(url) {
+  if (win && win.webContents) {
+    win.webContents.send('deep-link', url)
+  } else {
+    deepLinkUrl = url
+  }
+}
+
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+      const url = commandLine.find(arg => arg.startsWith('youtumate://'))
+      if (url) {
+        handleDeepLink(url)
+      }
+    }
+  })
+}
+
+app.on('open-url', (event, url) => {
+  event.preventDefault()
+  handleDeepLink(url)
+})
+
 function createWindow() {
   const primaryDisplay = screen.getPrimaryDisplay()
   const { width, height } = primaryDisplay.workAreaSize
@@ -47,6 +87,10 @@ function createWindow() {
 
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    if (deepLinkUrl) {
+      win.webContents.send('deep-link', deepLinkUrl)
+      deepLinkUrl = null
+    }
   })
 
   if (VITE_DEV_SERVER_URL) {

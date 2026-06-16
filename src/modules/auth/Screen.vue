@@ -26,9 +26,13 @@
               <InputText id="password" name="password" type="password" style="width: 100%" autocomplete="current-password" />
               <label for="password">Password</label>
             </FloatLabel>
-            <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
-              {{ $form.password.error?.message }}
-            </Message>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" style="margin: 0;">
+                {{ $form.password.error?.message }}
+              </Message>
+              <div v-else></div>
+              <router-link to="/forgot-password" class="auth-link" style="font-size: 0.875rem; margin-top: 0.25rem;">Forgot password?</router-link>
+            </div>
           </div>
 
           <Message v-if="authError" severity="error" size="small" variant="simple">{{ authError }}</Message>
