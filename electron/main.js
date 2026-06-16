@@ -18,6 +18,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 process.env.DIST = join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public')
 
+app.setName('Youtumate')
+
 let win
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
