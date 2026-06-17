@@ -2,8 +2,14 @@
   <div class="screen-container">
     <div class="header-actions">
       <h1>Subscriptions</h1>
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <SelectButton v-model="billingCycle" :options="billingOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+      <div style="display: flex; gap: 1rem; align-items: center">
+        <SelectButton
+          v-model="billingCycle"
+          :options="billingOptions"
+          optionLabel="label"
+          optionValue="value"
+          :allowEmpty="false"
+        />
         <Button
           label="History"
           icon="pi pi-history"
@@ -28,9 +34,23 @@
       <div v-for="plan in plans" :key="plan.$id" class="plan-card">
         <div class="plan-header">
           <h3>{{ plan.name }}</h3>
-          <div class="price">{{ formatCurrency(billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually) }}</div>
-          <div style="color: var(--p-surface-400); font-size: 0.9rem; margin-top: 0.5rem">
-            / {{ billingCycle === 'monthly' ? 'month' : 'year' }}
+          <div class="price">
+            {{
+              formatCurrency(
+                billingCycle === "monthly"
+                  ? plan.priceMonthly
+                  : plan.priceAnnually,
+              )
+            }}
+          </div>
+          <div
+            style="
+              color: var(--p-surface-400);
+              font-size: 0.9rem;
+              margin-top: 0.5rem;
+            "
+          >
+            / {{ billingCycle === "monthly" ? "month" : "year" }}
           </div>
         </div>
 
@@ -118,8 +138,6 @@
       </div>
     </Dialog>
 
-
-
     <!-- Payment Coming Soon Dialog -->
     <Dialog
       v-model:visible="isPaymentDialogVisible"
@@ -146,7 +164,8 @@
         ></i>
         <p>Payment integration (Mayar.id) is currently under development.</p>
         <p style="color: var(--p-surface-400); font-size: 0.9rem">
-          Payment link is not configured for this plan yet. Please try a free plan or check back later!
+          Payment link is not configured for this plan yet. Please try a free
+          plan or check back later!
         </p>
       </div>
       <template #footer>
@@ -166,12 +185,25 @@
       modal
       header="Secure Payment"
       :closable="true"
-      :contentStyle="{ padding: 0, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }"
+      :contentStyle="{
+        padding: 0,
+        overflow: 'hidden',
+        height: '80vh',
+        width: '40vw',
+        display: 'flex',
+        flexDirection: 'column',
+      }"
     >
       <webview
         v-if="activePaymentUrl"
         :src="activePaymentUrl"
-        style="flex: 1; width: 100%; height: 100%; border: none; background: #fff;"
+        style="
+          flex: 1;
+          width: 100%;
+          height: 100%;
+          border: none;
+          background: #fff;
+        "
       ></webview>
     </Dialog>
 
