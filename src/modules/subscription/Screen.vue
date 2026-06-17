@@ -2,12 +2,15 @@
   <div class="screen-container">
     <div class="header-actions">
       <h1>Subscriptions</h1>
-      <Button
-        label="History"
-        icon="pi pi-history"
-        outlined
-        @click="openHistoryModal"
-      />
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <SelectButton v-model="billingCycle" :options="billingOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+        <Button
+          label="History"
+          icon="pi pi-history"
+          outlined
+          @click="openHistoryModal"
+        />
+      </div>
     </div>
 
     <!-- Plans Section -->
@@ -25,7 +28,10 @@
       <div v-for="plan in plans" :key="plan.$id" class="plan-card">
         <div class="plan-header">
           <h3>{{ plan.name }}</h3>
-          <div class="price">{{ formatCurrency(plan.price) }}</div>
+          <div class="price">{{ formatCurrency(billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually) }}</div>
+          <div style="color: var(--p-surface-400); font-size: 0.9rem; margin-top: 0.5rem">
+            / {{ billingCycle === 'monthly' ? 'month' : 'year' }}
+          </div>
         </div>
 
         <ul class="features-list">
@@ -167,7 +173,7 @@
         ></i>
         <p>Payment integration (Mayar.id) is currently under development.</p>
         <p style="color: var(--p-surface-400); font-size: 0.9rem">
-          Please try a free plan or check back later!
+          Payment link is not configured for this plan yet. Please try a free plan or check back later!
         </p>
       </div>
       <template #footer>
@@ -188,6 +194,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import Button from "primevue/button";
+import SelectButton from "primevue/selectbutton";
 import Dialog from "primevue/dialog";
 import Skeleton from "primevue/skeleton";
 import DataTable from "primevue/datatable";
@@ -201,6 +208,12 @@ import { useAuthStore } from "../../store/auth.js";
 const isLoading = ref(true);
 const plans = ref([]);
 const activeSubscription = ref(null);
+
+const billingCycle = ref("monthly");
+const billingOptions = ref([
+	{ label: "Monthly", value: "monthly" },
+	{ label: "Annually", value: "annually" },
+]);
 
 const isHistoryVisible = ref(false);
 const isLoadingHistory = ref(false);
@@ -318,10 +331,21 @@ const getStatusSeverity = (status) => {
 
 const handleSubscribeClick = (plan) => {
 	selectedPlan.value = plan;
-	if (plan.price === 0) {
+	const currentPrice =
+		billingCycle.value === "monthly" ? plan.priceMonthly : plan.priceAnnually;
+
+	if (currentPrice === 0 || !currentPrice) {
 		isConfirmVisible.value = true;
 	} else {
-		isPaymentDialogVisible.value = true;
+		const paymentLink =
+			billingCycle.value === "monthly"
+				? plan.paymentLinkMonthly
+				: plan.paymentLinkAnnually;
+		if (paymentLink) {
+			window.open(paymentLink, "_blank");
+		} else {
+			isPaymentDialogVisible.value = true;
+		}
 	}
 };
 
@@ -333,7 +357,13 @@ const proceedSubscription = async () => {
 	try {
 		const now = new Date();
 		const expiredDate = new Date();
-		expiredDate.setDate(now.getDate() + 30); // 30 days subscription
+
+		// Set duration based on billing cycle
+		if (billingCycle.value === "monthly") {
+			expiredDate.setDate(now.getDate() + 30);
+		} else {
+			expiredDate.setFullYear(now.getFullYear() + 1);
+		}
 
 		// Create active subscription
 		const subDoc = await databases.createDocument(
@@ -359,7 +389,10 @@ const proceedSubscription = async () => {
 			{
 				userId: currentUser.value.$id,
 				planId: selectedPlan.value.$id,
-				amount: selectedPlan.value.price,
+				amount:
+					billingCycle.value === "monthly"
+						? selectedPlan.value.priceMonthly
+						: selectedPlan.value.priceAnnually,
 				status: "success",
 				transactionDate: now.toISOString(),
 				referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,

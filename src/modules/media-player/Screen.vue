@@ -257,7 +257,8 @@ const startPlayer = async () => {
 			}
 		} catch (err) {
 			console.error("Failed to check daily limits", err);
-			formError.value = "Failed to verify subscription limits. Please try again.";
+			formError.value =
+				"Failed to verify subscription limits. Please try again.";
 			return;
 		}
 	}
