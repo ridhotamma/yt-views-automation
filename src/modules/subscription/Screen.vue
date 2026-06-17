@@ -1,7 +1,7 @@
 <template>
   <div class="screen-container">
     <div class="header-actions">
-      <h1>Subscriptions</h1>
+      <h1>{{ $t('subscriptions.title') }}</h1>
       <div style="display: flex; gap: 1rem; align-items: center">
         <SelectButton
           v-model="billingCycle"
@@ -11,7 +11,7 @@
           :allowEmpty="false"
         />
         <Button
-          label="History"
+          :label="$t('subscriptions.history')"
           icon="pi pi-history"
           outlined
           @click="openHistoryModal"
@@ -59,7 +59,7 @@
         </div>
 
         <ul class="features-list">
-          <li v-for="(feature, idx) in plan.features" :key="idx">
+          <li v-for="(feature, idx) in ($i18n.locale === 'en' ? plan.features_en : plan.features_id)" :key="idx">
             <i
               class="pi pi-check-circle"
               style="color: var(--p-green-500); margin-right: 0.5rem"
@@ -72,8 +72,8 @@
           <Button
             :label="
               activeSubscription?.planId === plan.$id
-                ? 'Subscribed'
-                : 'Subscribe Now'
+                ? $t('subscriptions.subscribed')
+                : $t('subscriptions.subscribeNow')
             "
             :disabled="activeSubscription?.planId === plan.$id || (isPremiumActive && plan.planType === 'free_plan')"
             :loading="isSubscribing && selectedPlan?.$id === plan.$id"

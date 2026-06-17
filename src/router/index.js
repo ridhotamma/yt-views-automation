@@ -3,6 +3,7 @@ import { h } from "vue";
 const EmptyView = { render: () => h("div") };
 import ProxyScreen from "../modules/proxy/Screen.vue";
 import SubscriptionScreen from "../modules/subscription/Screen.vue";
+import SettingsScreen from "../modules/settings/Screen.vue";
 import LoginScreen from "../modules/auth/Screen.vue";
 import { useAuthStore } from "../store/auth.js";
 
@@ -31,6 +32,12 @@ const router = createRouter({
 			path: "/subscription",
 			name: "subscription",
 			component: SubscriptionScreen,
+			meta: { requiresAuth: true },
+		},
+		{
+			path: "/settings",
+			name: "settings",
+			component: SettingsScreen,
 			meta: { requiresAuth: true },
 		},
 	],

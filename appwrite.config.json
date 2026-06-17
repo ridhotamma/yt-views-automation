@@ -332,7 +332,15 @@
 					"encrypt": false
 				},
 				{
-					"key": "features",
+					"key": "features_id",
+					"type": "text",
+					"required": false,
+					"array": true,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "features_en",
 					"type": "text",
 					"required": false,
 					"array": true,

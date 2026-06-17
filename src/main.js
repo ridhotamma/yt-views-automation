@@ -10,6 +10,7 @@ import ToastService from "primevue/toastservice";
 
 import App from "./App.vue";
 import router from "./router";
+import { i18n } from "./plugins/i18n";
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -18,9 +19,13 @@ pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 
 app.use(router);
+app.use(i18n);
 app.use(PrimeVue, {
 	theme: {
 		preset: Aura,
+		options: {
+			darkModeSelector: '.app-dark',
+		}
 	},
 });
 app.use(ToastService);

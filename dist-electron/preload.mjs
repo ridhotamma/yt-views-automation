@@ -3,9 +3,7 @@ let electron = require("electron");
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 	on(...args) {
 		const [channel, listener] = args;
-		return electron.ipcRenderer.on(channel, (event, ...args) =>
-			listener(event, ...args),
-		);
+		return electron.ipcRenderer.on(channel, (event, ...args) => listener(event, ...args));
 	},
 	off(...args) {
 		const [channel, ...omit] = args;
@@ -18,6 +16,6 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 	invoke(...args) {
 		const [channel, ...omit] = args;
 		return electron.ipcRenderer.invoke(channel, ...omit);
-	},
+	}
 });
 //#endregion

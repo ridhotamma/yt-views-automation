@@ -20,12 +20,12 @@
           to="/" 
           class="menu-item" 
           :class="{ 'locked-menu-item': hasActiveSubscription === false }"
-          v-tooltip.right="isCollapsed ? 'Media Players' : ''" 
+          v-tooltip.right="isCollapsed ? $t('sidebar.mediaPlayers') : ''" 
           active-class="active"
           @click.prevent="preventIfLocked"
         >
           <i class="pi pi-desktop menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Media Players</span>
+          <span v-if="!isCollapsed" class="menu-label">{{ $t('sidebar.mediaPlayers') }}</span>
           <i v-if="hasActiveSubscription === false && !isCollapsed" class="pi pi-lock lock-icon"></i>
         </router-link>
         
@@ -33,18 +33,23 @@
           to="/proxy" 
           class="menu-item" 
           :class="{ 'locked-menu-item': hasActiveSubscription === false }"
-          v-tooltip.right="isCollapsed ? 'Proxy List' : ''" 
+          v-tooltip.right="isCollapsed ? $t('sidebar.proxyList') : ''" 
           active-class="active"
           @click.prevent="preventIfLocked"
         >
           <i class="pi pi-list menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Proxy List</span>
+          <span v-if="!isCollapsed" class="menu-label">{{ $t('sidebar.proxyList') }}</span>
           <i v-if="hasActiveSubscription === false && !isCollapsed" class="pi pi-lock lock-icon"></i>
         </router-link>
         
-        <router-link to="/subscription" class="menu-item" v-tooltip.right="isCollapsed ? 'Subscriptions' : ''" active-class="active">
+        <router-link to="/subscription" class="menu-item" v-tooltip.right="isCollapsed ? $t('sidebar.subscriptions') : ''" active-class="active">
           <i class="pi pi-credit-card menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Subscriptions</span>
+          <span v-if="!isCollapsed" class="menu-label">{{ $t('sidebar.subscriptions') }}</span>
+        </router-link>
+        
+        <router-link to="/settings" class="menu-item" v-tooltip.right="isCollapsed ? $t('sidebar.settings') : ''" active-class="active">
+          <i class="pi pi-cog menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">{{ $t('sidebar.settings') }}</span>
         </router-link>
       </div>
 
@@ -65,7 +70,7 @@
       <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px;">
         <a href="#" class="popover-item logout-btn" @click.prevent="confirmLogout">
           <i class="pi pi-sign-out"></i>
-          <span>Logout</span>
+          <span>{{ $t('sidebar.logout') }}</span>
         </a>
       </div>
     </Popover>
@@ -91,6 +96,8 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { account } from "./lib/appwrite";
 import { useAuthStore } from "./store/auth";
+import { useSettingsStore } from "./store/settings";
+import { useI18n } from "vue-i18n";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import Popover from "primevue/popover";
@@ -100,6 +107,8 @@ const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(window.innerWidth <= 1024);
 const authStore = useAuthStore();
+const settingsStore = useSettingsStore();
+const { locale } = useI18n();
 const currentUser = computed(() => authStore.user);
 const hasActiveSubscription = computed(() => authStore.hasActiveSubscription);
 
@@ -143,6 +152,27 @@ const proceedLogout = async () => {
 onMounted(async () => {
 	window.addEventListener("resize", handleResize);
 	await authStore.initAuth();
+	
+	if (settingsStore.theme === "dark") {
+		document.documentElement.classList.add("app-dark");
+	} else {
+		document.documentElement.classList.remove("app-dark");
+	}
+	locale.value = settingsStore.locale;
+});
+
+import { watch } from "vue";
+
+watch(() => settingsStore.theme, (newTheme) => {
+	if (newTheme === "dark") {
+		document.documentElement.classList.add("app-dark");
+	} else {
+		document.documentElement.classList.remove("app-dark");
+	}
+});
+
+watch(() => settingsStore.locale, (newLocale) => {
+	locale.value = newLocale;
 });
 
 onUnmounted(() => {
