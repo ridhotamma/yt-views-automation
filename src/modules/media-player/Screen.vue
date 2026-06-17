@@ -189,6 +189,7 @@ onMounted(async () => {
 
 			const res = await databases.listDocuments(DB_ID, collectionId, [
 				Query.equal("userId", currentUser.value.$id),
+				Query.orderDesc("$createdAt"),
 			]);
 
 			players.value = res.documents.map((doc) => {
@@ -300,7 +301,7 @@ const startPlayer = async () => {
 
 		const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
 
-		players.value.push({
+		players.value.unshift({
 			id: doc.$id,
 			youtubeUrls: doc.youtubeUrls,
 			userId: doc.userId,
