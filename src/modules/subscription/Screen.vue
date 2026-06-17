@@ -71,7 +71,7 @@
                 ? 'Subscribed'
                 : 'Subscribe Now'
             "
-            :disabled="activeSubscription?.planId === plan.$id"
+            :disabled="activeSubscription?.planId === plan.$id || (isPremiumActive && plan.planType === 'free_plan')"
             :loading="isSubscribing && selectedPlan?.$id === plan.$id"
             :severity="
               activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'
@@ -250,6 +250,14 @@ const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 const toast = useToast();
 
+const isPremiumActive = computed(() => {
+	if (!activeSubscription.value) return false;
+	const currentPlan = plans.value.find(
+		(p) => p.$id === activeSubscription.value.planId,
+	);
+	return currentPlan && currentPlan.planType === "paid_plan";
+});
+
 let realtimeUnsubscribe = null;
 
 onMounted(async () => {
@@ -277,6 +285,8 @@ onMounted(async () => {
 
 			if (subsRes.documents.length > 0) {
 				activeSubscription.value = subsRes.documents[0];
+			} else {
+				activeSubscription.value = null;
 			}
 
 			// Listen for realtime updates from the webhook
@@ -433,6 +443,22 @@ const proceedSubscription = async () => {
 			expiredDate.setDate(now.getDate() + 30);
 		} else {
 			expiredDate.setFullYear(now.getFullYear() + 1);
+		}
+
+		// Deactivate existing active subscriptions
+		const activeSubsResponse = await databases.listDocuments(
+			DB_ID,
+			"user_subscriptions",
+			[
+				Query.equal("userId", currentUser.value.$id),
+				Query.equal("status", "active"),
+			],
+		);
+
+		for (const sub of activeSubsResponse.documents) {
+			await databases.updateDocument(DB_ID, "user_subscriptions", sub.$id, {
+				status: "inactive",
+			});
 		}
 
 		// Create active subscription

@@ -141,7 +141,23 @@ export default async ({ req, res, log, error }) => {
 		});
 		log(`Created transaction record for ${transactionId}`);
 
-		// 5. Update or Create Subscription
+		// 5. Deactivate old subscriptions for different plans
+		const activeSubsResponse = await databases.listDocuments(
+			databaseId,
+			subCollectionId,
+			[Query.equal("userId", userId), Query.equal("status", "active")],
+		);
+
+		for (const sub of activeSubsResponse.documents) {
+			if (sub.planId !== planId) {
+				await databases.updateDocument(databaseId, subCollectionId, sub.$id, {
+					status: "inactive",
+				});
+				log(`Deactivated old subscription ${sub.$id} for user ${userId}`);
+			}
+		}
+
+		// 6. Update or Create Subscription
 		const subResponse = await databases.listDocuments(
 			databaseId,
 			subCollectionId,

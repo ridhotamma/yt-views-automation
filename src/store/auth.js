@@ -9,8 +9,6 @@ export const useAuthStore = defineStore("auth", {
 	}),
 	actions: {
 		async initAuth() {
-			if (this.user && this.hasActiveSubscription !== null) return this.user;
-
 			try {
 				const currentUser = await account.get();
 				this.user = currentUser;
