@@ -117,6 +117,7 @@ export default async ({ req, res, log, error }) => {
 		}
 
 		log("Request Body: " + JSON.stringify(body, null, 2));
+		log("Request Headers: " + JSON.stringify(req.headers, null, 2));
 
 		if (!body || !body.event) {
 			return res.json(
