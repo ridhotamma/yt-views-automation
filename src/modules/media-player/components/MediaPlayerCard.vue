@@ -141,6 +141,12 @@ const onDomReady = async (event) => {
       return new Promise(resolve => {
         const interval = setInterval(() => {
           try {
+            // Force disable YouTube Autoplay Next feature
+            const autoplayToggle = document.querySelector('.ytp-autonav-toggle-button');
+            if (autoplayToggle && autoplayToggle.getAttribute('aria-checked') === 'true') {
+              autoplayToggle.click();
+            }
+
             // Auto skip ads if the button appears
             const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
             if (skipBtn) skipBtn.click();
