@@ -224,7 +224,14 @@ import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
-import { databases, functions, Query, ID, DB_ID, client } from "../../lib/appwrite.js";
+import {
+	databases,
+	functions,
+	Query,
+	ID,
+	DB_ID,
+	client,
+} from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 
 const isLoading = ref(true);
@@ -420,22 +427,50 @@ const handleSubscribeClick = async (plan) => {
 				: plan.paymentIframeAnnually || plan.paymentLinkAnnually;
 		if (paymentLink) {
 			try {
-				let finalLink = paymentLink;
-				if (!finalLink.startsWith('http://') && !finalLink.startsWith('https://')) {
-					finalLink = 'https://' + finalLink;
+				let finalUrlStr = "";
+
+				if (paymentLink.includes("<iframe")) {
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(paymentLink, "text/html");
+					const iframe = doc.querySelector("iframe");
+
+					if (iframe && iframe.src) {
+						const url = new URL(iframe.src);
+						for (const attr of iframe.attributes) {
+							if (attr.name.startsWith("data-")) {
+								const paramName = attr.name.replace("data-", "");
+								url.searchParams.set(paramName, attr.value);
+							}
+						}
+						url.searchParams.set("name", currentUser.value?.name || "User");
+						url.searchParams.set("email", currentUser.value?.email || "");
+						finalUrlStr = url.toString();
+					} else {
+						throw new Error("Iframe tag found but no src attribute");
+					}
+				} else {
+					let finalLink = paymentLink;
+					if (
+						!finalLink.startsWith("http://") &&
+						!finalLink.startsWith("https://")
+					) {
+						finalLink = "https://" + finalLink;
+					}
+					const url = new URL(finalLink);
+					url.searchParams.set("name", currentUser.value?.name || "User");
+					url.searchParams.set("email", currentUser.value?.email || "");
+					finalUrlStr = url.toString();
 				}
-				const url = new URL(finalLink);
-				url.searchParams.set("name", currentUser.value?.name || "User");
-				url.searchParams.set("email", currentUser.value?.email || "");
-				activePaymentUrl.value = url.toString();
+
+				activePaymentUrl.value = finalUrlStr;
 				isPaymentWebviewVisible.value = true;
 			} catch (err) {
 				console.error("Invalid payment link:", paymentLink, err);
 				toast.add({
-					severity: 'error',
-					summary: 'Error',
-					detail: 'Invalid payment link configuration',
-					life: 3000
+					severity: "error",
+					summary: "Error",
+					detail: "Invalid payment link configuration",
+					life: 3000,
 				});
 			}
 		} else {
@@ -455,8 +490,8 @@ const proceedSubscription = async () => {
 			JSON.stringify({
 				action: "subscribe_free_plan",
 				planId: selectedPlan.value.$id,
-				billingCycle: billingCycle.value
-			})
+				billingCycle: billingCycle.value,
+			}),
 		);
 
 		const result = JSON.parse(response.responseBody);

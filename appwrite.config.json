@@ -125,9 +125,7 @@
 		},
 		{
 			"$id": "user_subscriptions",
-			"$permissions": [
-				"read(\"users\")"
-			],
+			"$permissions": ["read(\"users\")"],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscriptions",
 			"enabled": true,
@@ -235,9 +233,7 @@
 		},
 		{
 			"$id": "subscription_plans",
-			"$permissions": [
-				"read(\"any\")"
-			],
+			"$permissions": ["read(\"any\")"],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "subscription_plans",
 			"enabled": true,
@@ -341,9 +337,7 @@
 		},
 		{
 			"$id": "user_subscription_transactions",
-			"$permissions": [
-				"read(\"users\")"
-			],
+			"$permissions": ["read(\"users\")"],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscription_transactions",
 			"enabled": true,

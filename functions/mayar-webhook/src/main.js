@@ -7,7 +7,7 @@ export default async ({ req, res, log, error }) => {
 
 	try {
 		const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-		
+
 		const client = new Client()
 			.setEndpoint(
 				process.env.APPWRITE_FUNCTION_ENDPOINT ||
@@ -42,10 +42,13 @@ export default async ({ req, res, log, error }) => {
 				plansCollectionId,
 				planId,
 			);
-			
+
 			if (planDoc.planType !== "free_plan") {
 				return res.json(
-					{ success: false, message: "Cannot subscribe to paid plan via this endpoint" },
+					{
+						success: false,
+						message: "Cannot subscribe to paid plan via this endpoint",
+					},
 					403,
 				);
 			}
@@ -91,7 +94,10 @@ export default async ({ req, res, log, error }) => {
 				{
 					userId: userId,
 					planId: planId,
-					amount: billingCycle === "monthly" ? planDoc.priceMonthly : planDoc.priceAnnually,
+					amount:
+						billingCycle === "monthly"
+							? planDoc.priceMonthly
+							: planDoc.priceAnnually,
 					status: "success",
 					transactionDate: now.toISOString(),
 					referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,

@@ -8,9 +8,9 @@ export default defineConfig({
 		vue({
 			template: {
 				compilerOptions: {
-					isCustomElement: (tag) => tag === 'webview'
-				}
-			}
+					isCustomElement: (tag) => tag === "webview",
+				},
+			},
 		}),
 		electron({
 			main: {
