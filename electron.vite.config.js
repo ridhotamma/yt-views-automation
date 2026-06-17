@@ -1,11 +1,27 @@
 import { resolve } from 'path'
 import { defineConfig } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
+import obfuscator from 'vite-plugin-javascript-obfuscator'
+
+const obfuscatorPlugin = obfuscator({
+  include: ['**/*.js', '**/*.ts'],
+  exclude: [/node_modules/],
+  apply: 'build',
+  options: {
+    compact: true,
+    controlFlowFlattening: true,
+    deadCodeInjection: false,
+    debugProtection: false,
+    disableConsoleOutput: false,
+    stringArray: true,
+    stringArrayEncoding: ['base64'],
+  }
+});
 
 export default defineConfig({
   main: {
+    plugins: [obfuscatorPlugin],
     build: {
-      bytecode: true,
       outDir: 'dist-electron',
       rollupOptions: {
         input: {
@@ -19,8 +35,8 @@ export default defineConfig({
     }
   },
   preload: {
+    plugins: [obfuscatorPlugin],
     build: {
-      bytecode: true,
       outDir: 'dist-electron',
       emptyOutDir: false,
       rollupOptions: {
