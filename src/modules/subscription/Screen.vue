@@ -400,7 +400,7 @@ const handleSubscribeClick = async (plan) => {
 	const currentPrice =
 		billingCycle.value === "monthly" ? plan.priceMonthly : plan.priceAnnually;
 
-	if (currentPrice === 0 || !currentPrice) {
+	if (plan.planType === "free_plan") {
 		await proceedSubscription();
 	} else {
 		const paymentLink =

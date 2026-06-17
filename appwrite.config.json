@@ -261,10 +261,7 @@
 					"key": "planType",
 					"type": "string",
 					"format": "enum",
-					"elements": [
-						"free_plan",
-						"paid_plan"
-					],
+					"elements": ["free_plan", "paid_plan"],
 					"required": true,
 					"array": false,
 					"default": null
