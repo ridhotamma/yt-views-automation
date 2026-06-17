@@ -10,10 +10,10 @@
         <p>Sign in to your Youtumate account</p>
       </div>
 
-        <Button label="Sign in with Google" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
-        <Message v-if="authError" severity="error" size="small" variant="simple" style="margin-top: 1rem; display: block; text-align: center;">{{ authError }}</Message>
-      </div>
+      <Button label="Sign in with Google" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
+      <Message v-if="authError" severity="error" size="small" variant="simple" style="margin-top: 1rem; display: block; text-align: center;">{{ authError }}</Message>
     </div>
+  </div>
 </template>
 
 <script setup>

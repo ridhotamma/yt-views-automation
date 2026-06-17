@@ -16,14 +16,30 @@
       </button>
 
       <div class="sidebar-menu">
-        <router-link to="/" class="menu-item" v-tooltip.right="isCollapsed ? 'Media Player' : ''" active-class="active">
-          <i class="pi pi-video menu-icon"></i>
-          <span v-if="!isCollapsed" class="menu-label">Media Player</span>
+        <router-link 
+          to="/" 
+          class="menu-item" 
+          :class="{ 'locked-menu-item': hasActiveSubscription === false }"
+          v-tooltip.right="isCollapsed ? 'Media Players' : ''" 
+          active-class="active"
+          @click.prevent="preventIfLocked"
+        >
+          <i class="pi pi-desktop menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Media Players</span>
+          <i v-if="hasActiveSubscription === false && !isCollapsed" class="pi pi-lock lock-icon"></i>
         </router-link>
         
-        <router-link to="/proxy" class="menu-item" v-tooltip.right="isCollapsed ? 'Proxy List' : ''" active-class="active">
+        <router-link 
+          to="/proxy" 
+          class="menu-item" 
+          :class="{ 'locked-menu-item': hasActiveSubscription === false }"
+          v-tooltip.right="isCollapsed ? 'Proxy List' : ''" 
+          active-class="active"
+          @click.prevent="preventIfLocked"
+        >
           <i class="pi pi-list menu-icon"></i>
           <span v-if="!isCollapsed" class="menu-label">Proxy List</span>
+          <i v-if="hasActiveSubscription === false && !isCollapsed" class="pi pi-lock lock-icon"></i>
         </router-link>
         
         <router-link to="/subscription" class="menu-item" v-tooltip.right="isCollapsed ? 'Subscriptions' : ''" active-class="active">
@@ -85,9 +101,16 @@ const route = useRoute();
 const isCollapsed = ref(window.innerWidth <= 1024);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
+const hasActiveSubscription = computed(() => authStore.hasActiveSubscription);
 
 const popover = ref();
 const isLogoutModalVisible = ref(false);
+
+const preventIfLocked = (e) => {
+	if (hasActiveSubscription.value === false) {
+		e.preventDefault();
+	}
+};
 
 const handleResize = () => {
 	if (window.innerWidth <= 1024) {
@@ -217,15 +240,28 @@ onUnmounted(() => {
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1.5rem;
-  color: var(--p-surface-400, #aaa);
+  padding: 0.75rem 1rem;
+  color: var(--p-surface-300, #aaa);
   text-decoration: none;
+  border-radius: 8px;
   transition: all 0.2s;
   overflow: hidden;
   white-space: nowrap;
+  margin: 0 1rem;
 }
 
-.menu-item:hover {
+.locked-menu-item {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.lock-icon {
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+
+.menu-item:not(.locked-menu-item):hover {
   background-color: var(--p-surface-800, #2a2a2a);
   color: var(--p-surface-0, #fff);
 }
@@ -233,7 +269,6 @@ onUnmounted(() => {
 .menu-item.active {
   background-color: var(--p-primary-900, #450a0a);
   color: var(--p-primary-400, #f87171);
-  border-right: 3px solid var(--p-primary-500, #ef4444);
 }
 
 .menu-icon {

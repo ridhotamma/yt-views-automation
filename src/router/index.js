@@ -4,7 +4,7 @@ const EmptyView = { render: () => h("div") };
 import ProxyScreen from "../modules/proxy/Screen.vue";
 import SubscriptionScreen from "../modules/subscription/Screen.vue";
 import LoginScreen from "../modules/auth/Screen.vue";
-import { account } from "../lib/appwrite";
+import { useAuthStore } from "../store/auth.js";
 
 const router = createRouter({
 	history: createWebHistory(),
@@ -37,20 +37,24 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-	let user = null;
-	try {
-		user = await account.get();
-	} catch (err) {
-		user = null;
-	}
+	const authStore = useAuthStore();
+	const user = await authStore.initAuth();
 
 	if (to.meta.requiresAuth && !user) {
-		next({ name: "login" });
-	} else if (to.meta.requiresGuest && user) {
-		next({ name: "media-player" });
-	} else {
-		next();
+		return next({ name: "login" });
 	}
+
+	if (to.meta.requiresGuest && user) {
+		return next({ name: "media-player" });
+	}
+
+	if (to.meta.requiresAuth && to.name !== "subscription" && user) {
+		if (authStore.hasActiveSubscription === false) {
+			return next({ name: "subscription" });
+		}
+	}
+
+	next();
 });
 
 export default router;

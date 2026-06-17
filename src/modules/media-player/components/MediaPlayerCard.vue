@@ -109,7 +109,7 @@ onMounted(async () => {
 		}
 	}
 	isProxyReady.value = true;
-	
+
 	nextTick(() => {
 		if (webviewRef.value && currentVideo.value) {
 			webviewRef.value.src = currentVideo.value;

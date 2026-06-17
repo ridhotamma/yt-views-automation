@@ -1,103 +1,69 @@
-import { BrowserWindow, app, ipcMain, screen, session } from "electron";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { BrowserWindow as e, app as t, ipcMain as n, screen as r, session as i } from "electron";
+import { dirname as a, join as o } from "node:path";
+import { fileURLToPath as s } from "node:url";
 //#region electron/main.js
-var __dirname = dirname(fileURLToPath(import.meta.url));
-process.env.DIST = join(__dirname, "../dist");
-process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, "../public");
-app.setName("Youtumate");
-var win;
-var VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-if (process.defaultApp) {
-	if (process.argv.length >= 2) app.setAsDefaultProtocolClient("youtumate", process.execPath, [join(process.argv[1])]);
-} else app.setAsDefaultProtocolClient("youtumate");
-var deepLinkUrl = null;
-function handleDeepLink(url) {
-	if (win && win.webContents) win.webContents.send("deep-link", url);
-	else deepLinkUrl = url;
+var c = a(s(import.meta.url));
+process.env.DIST = o(c, "../dist"), process.env.VITE_PUBLIC = t.isPackaged ? process.env.DIST : o(process.env.DIST, "../public"), t.setName("Youtumate");
+var l, u = process.env.VITE_DEV_SERVER_URL;
+process.defaultApp ? process.argv.length >= 2 && t.setAsDefaultProtocolClient("youtumate", process.execPath, [o(process.argv[1])]) : t.setAsDefaultProtocolClient("youtumate");
+var d = null;
+function f(e) {
+	l && l.webContents ? l.webContents.send("deep-link", e) : d = e;
 }
-if (!app.requestSingleInstanceLock()) app.quit();
-else app.on("second-instance", (event, commandLine, workingDirectory) => {
-	if (win) {
-		if (win.isMinimized()) win.restore();
-		win.focus();
-		const url = commandLine.find((arg) => arg.startsWith("youtumate://"));
-		if (url) handleDeepLink(url);
+t.requestSingleInstanceLock() ? t.on("second-instance", (e, t, n) => {
+	if (l) {
+		l.isMinimized() && l.restore(), l.focus();
+		let e = t.find((e) => e.startsWith("youtumate://"));
+		e && f(e);
 	}
+}) : t.quit(), t.on("open-url", (e, t) => {
+	e.preventDefault(), f(t);
 });
-app.on("open-url", (event, url) => {
-	event.preventDefault();
-	handleDeepLink(url);
-});
-function createWindow() {
-	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-	const iconPath = join(process.env.VITE_PUBLIC, "/images/favicon.png");
-	if (process.platform === "darwin") app.dock.setIcon(iconPath);
-	win = new BrowserWindow({
-		width: Math.floor(width / 2),
-		height: Math.floor(height * .9),
-		minWidth: Math.floor(width / 2),
+function p() {
+	let { width: n, height: i } = r.getPrimaryDisplay().workAreaSize, a = o(process.env.VITE_PUBLIC, "/images/favicon.png");
+	process.platform === "darwin" && t.dock.setIcon(a), l = new e({
+		width: Math.floor(n / 2),
+		height: Math.floor(i * .9),
+		minWidth: Math.floor(n / 2),
 		minHeight: 600,
-		icon: iconPath,
+		icon: a,
 		webPreferences: {
-			preload: join(__dirname, "preload.mjs"),
-			webviewTag: true
+			preload: o(c, "preload.mjs"),
+			webviewTag: !0
 		}
-	});
-	win.webContents.on("did-finish-load", () => {
-		win?.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-		if (deepLinkUrl) {
-			win.webContents.send("deep-link", deepLinkUrl);
-			deepLinkUrl = null;
-		}
-	});
-	win.webContents.on("will-navigate", (event, url) => {
-		if ((VITE_DEV_SERVER_URL ? !url.startsWith(VITE_DEV_SERVER_URL) : !url.startsWith("file://")) && url.includes("account/sessions/oauth2")) {
-			event.preventDefault();
-			const authWin = new BrowserWindow({
+	}), l.webContents.on("did-finish-load", () => {
+		l?.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString()), d &&= (l.webContents.send("deep-link", d), null);
+	}), l.webContents.on("will-navigate", (t, n) => {
+		if ((u ? !n.startsWith(u) : !n.startsWith("file://")) && n.includes("account/sessions/oauth2")) {
+			t.preventDefault();
+			let r = new e({
 				width: 600,
 				height: 700,
 				webPreferences: {
-					nodeIntegration: false,
-					contextIsolation: true
+					nodeIntegration: !1,
+					contextIsolation: !0
 				}
 			});
-			authWin.loadURL(url);
-			const handleRedirect = (e, newUrl) => {
-				if (VITE_DEV_SERVER_URL ? newUrl.startsWith(VITE_DEV_SERVER_URL) : newUrl.startsWith("file://") || newUrl.startsWith("youtumate://")) {
-					e.preventDefault();
-					authWin.close();
-					win.reload();
-				}
+			r.loadURL(n);
+			let i = (e, t) => {
+				(u ? t.startsWith(u) : t.startsWith("file://") || t.startsWith("youtumate://")) && (e.preventDefault(), r.close(), l.reload());
 			};
-			authWin.webContents.on("will-navigate", handleRedirect);
-			authWin.webContents.on("will-redirect", handleRedirect);
+			r.webContents.on("will-navigate", i), r.webContents.on("will-redirect", i);
 		}
-	});
-	if (VITE_DEV_SERVER_URL) win.loadURL(VITE_DEV_SERVER_URL);
-	else win.loadFile(join(process.env.DIST, "index.html"));
+	}), u ? l.loadURL(u) : l.loadFile(o(process.env.DIST, "index.html"));
 }
-ipcMain.handle("set-proxy", async (event, partition, proxyRules) => {
+n.handle("set-proxy", async (e, t, n) => {
 	try {
-		await session.fromPartition(partition).setProxy({ proxyRules });
-		console.log(`[Proxy] Set ${proxyRules} for ${partition}`);
-		return true;
-	} catch (err) {
-		console.error(`[Proxy] Failed to set proxy for ${partition}:`, err);
-		return false;
+		return await i.fromPartition(t).setProxy({ proxyRules: n }), console.log(`[Proxy] Set ${n} for ${t}`), !0;
+	} catch (e) {
+		return console.error(`[Proxy] Failed to set proxy for ${t}:`, e), !1;
 	}
-});
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") {
-		app.quit();
-		win = null;
-	}
-});
-app.on("activate", () => {
-	if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-app.whenReady().then(() => {
-	createWindow();
+}), t.on("window-all-closed", () => {
+	process.platform !== "darwin" && (t.quit(), l = null);
+}), t.on("activate", () => {
+	e.getAllWindows().length === 0 && p();
+}), t.whenReady().then(() => {
+	p();
 });
 //#endregion
 export {};

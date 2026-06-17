@@ -83,7 +83,7 @@ import Skeleton from "primevue/skeleton";
 import Select from "primevue/select";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
-import { databases, ID, Query } from "../../lib/appwrite.js";
+import { databases, ID, Query, DB_ID } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 import { generateUserAgent } from "../../utils/userAgent.js";
 
@@ -100,12 +100,12 @@ const uaOptions = ref([
 	{ label: "Windows Desktop", value: "windows" },
 	{ label: "macOS Desktop", value: "macos" },
 	{ label: "iPhone Mobile", value: "iphone" },
-	{ label: "Android Mobile", value: "android" }
+	{ label: "Android Mobile", value: "android" },
 ]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 
-const dbId = "6a31a1b80021df02203f";
+
 const collectionId = "media_players";
 
 onMounted(async () => {
@@ -114,14 +114,14 @@ onMounted(async () => {
 		await authStore.initAuth();
 
 		if (currentUser.value) {
-			const proxyRes = await databases.listDocuments(dbId, "proxies");
+			const proxyRes = await databases.listDocuments(DB_ID, "proxies");
 			proxiesList.value = proxyRes.documents.map((doc) => ({
 				id: doc.$id,
 				name: doc.name,
 				ipAddress: doc.ipAddress,
 			}));
 
-			const res = await databases.listDocuments(dbId, collectionId, [
+			const res = await databases.listDocuments(DB_ID, collectionId, [
 				Query.equal("userId", currentUser.value.$id),
 			]);
 
@@ -175,11 +175,12 @@ const startPlayer = async () => {
 	}
 
 	try {
-		const uaType = selectedUaType.value === "random" ? null : selectedUaType.value;
+		const uaType =
+			selectedUaType.value === "random" ? null : selectedUaType.value;
 		const uaString = generateUserAgent(uaType);
 
 		const doc = await databases.createDocument(
-			dbId,
+			DB_ID,
 			collectionId,
 			ID.unique(),
 			{
@@ -213,7 +214,7 @@ const startPlayer = async () => {
 
 const stopPlayer = async (id) => {
 	try {
-		await databases.deleteDocument(dbId, collectionId, id);
+		await databases.deleteDocument(DB_ID, collectionId, id);
 		players.value = players.value.filter((p) => p.id !== id);
 	} catch (e) {
 		console.error("Failed to delete player", e);
@@ -223,7 +224,7 @@ const stopPlayer = async (id) => {
 const handleUpdateQueue = async (player, newQueue) => {
 	player.currentQueue = newQueue;
 	try {
-		await databases.updateDocument(dbId, collectionId, player.id, {
+		await databases.updateDocument(DB_ID, collectionId, player.id, {
 			currentQueue: newQueue,
 		});
 	} catch (e) {

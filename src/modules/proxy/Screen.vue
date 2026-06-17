@@ -109,7 +109,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Skeleton from "primevue/skeleton";
 import { Form, FormField } from "@primevue/forms";
-import { databases, ID } from "../../lib/appwrite.js";
+import { databases, ID, DB_ID } from "../../lib/appwrite.js";
 import { proxyRegex } from "../../constants/validator.js";
 
 const isLoading = ref(true);
@@ -124,13 +124,13 @@ const formError = ref("");
 const isDeleteModalVisible = ref(false);
 const proxyToDelete = ref(null);
 
-const dbId = "6a31a1b80021df02203f";
+
 const collectionId = "proxies";
 
 const fetchProxies = async () => {
 	isLoading.value = true;
 	try {
-		const res = await databases.listDocuments(dbId, collectionId);
+		const res = await databases.listDocuments(DB_ID, collectionId);
 		proxies.value = res.documents.map((doc) => ({
 			id: doc.$id,
 			name: doc.name,
@@ -176,7 +176,10 @@ const resolver = ({ values }) => {
 		errors.ipAddress = [{ message: "IP Address is required." }];
 	} else if (!proxyRegex.test(values.ipAddress.trim())) {
 		errors.ipAddress = [
-			{ message: "Invalid Proxy format. Include schema if necessary (e.g. socks5://ip:port)." },
+			{
+				message:
+					"Invalid Proxy format. Include schema if necessary (e.g. socks5://ip:port).",
+			},
 		];
 	}
 	return { errors };
@@ -189,7 +192,7 @@ const onFormSubmit = async ({ valid }) => {
 	try {
 		if (modalMode.value === "create") {
 			const doc = await databases.createDocument(
-				dbId,
+				DB_ID,
 				collectionId,
 				ID.unique(),
 				{

@@ -26,12 +26,6 @@
         <div class="plan-header">
           <h3>{{ plan.name }}</h3>
           <div class="price">{{ formatCurrency(plan.price) }}</div>
-          <Tag
-            v-if="activeSubscription?.planId === plan.$id"
-            severity="success"
-            value="Current Subscription"
-            class="current-badge"
-          />
         </div>
 
         <ul class="features-list">
@@ -45,17 +39,12 @@
         </ul>
 
         <div class="plan-footer">
-          <Button
-            :label="
-              activeSubscription?.planId === plan.$id
-                ? 'Subscribed'
-                : 'Subscribe Now'
-            "
+          <Button 
+            :label="activeSubscription?.planId === plan.$id ? 'Subscribed' : 'Subscribe Now'" 
             :disabled="activeSubscription?.planId === plan.$id"
-            :severity="
-              activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'
-            "
+            :severity="activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'"
             class="w-full"
+            @click="handleSubscribeClick(plan)"
           />
         </div>
       </div>
@@ -115,6 +104,32 @@
         </DataTable>
       </div>
     </Dialog>
+
+    <!-- Subscription Confirmation Dialog -->
+    <Dialog v-model:visible="isConfirmVisible" modal header="Confirm Subscription" :style="{ width: '400px' }">
+      <div v-if="selectedPlan">
+        <p>Are you sure you want to subscribe to the <strong>{{ selectedPlan.name }}</strong> plan?</p>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" text @click="isConfirmVisible = false" />
+        <Button label="Subscribe" icon="pi pi-check" severity="success" :loading="isSubscribing" @click="proceedSubscription" />
+      </template>
+    </Dialog>
+
+    <!-- Payment Coming Soon Dialog -->
+    <Dialog v-model:visible="isPaymentDialogVisible" modal header="Coming Soon" :style="{ width: '400px' }">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem 0;">
+        <i class="pi pi-credit-card" style="font-size: 3rem; color: var(--p-primary-500); margin-bottom: 1rem;"></i>
+        <p>Payment integration (Mayar.id) is currently under development.</p>
+        <p style="color: var(--p-surface-400); font-size: 0.9rem;">Please try a free plan or check back later!</p>
+      </div>
+      <template #footer>
+        <Button label="Close" text @click="isPaymentDialogVisible = false" class="w-full" />
+      </template>
+    </Dialog>
+
+    <!-- Toast for Notifications -->
+    <Toast />
   </div>
 </template>
 
@@ -126,10 +141,12 @@ import Skeleton from "primevue/skeleton";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Tag from "primevue/tag";
-import { databases, Query } from "../../lib/appwrite.js";
+import Toast from "primevue/toast";
+import { useToast } from "primevue/usetoast";
+import { databases, Query, ID, DB_ID } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 
-const dbId = "6a31a1b80021df02203f";
+
 
 const isLoading = ref(true);
 const plans = ref([]);
@@ -139,110 +156,187 @@ const isHistoryVisible = ref(false);
 const isLoadingHistory = ref(false);
 const transactions = ref([]);
 
+const isConfirmVisible = ref(false);
+const isPaymentDialogVisible = ref(false);
+const selectedPlan = ref(null);
+const isSubscribing = ref(false);
+
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
+const toast = useToast();
 
 onMounted(async () => {
-  isLoading.value = true;
-  try {
-    await authStore.initAuth();
+	isLoading.value = true;
+	try {
+		await authStore.initAuth();
 
-    if (currentUser.value) {
-      // Fetch subscription plans
-      const plansRes = await databases.listDocuments(
-        dbId,
-        "subscription_plans",
-      );
-      plans.value = plansRes.documents;
+		if (currentUser.value) {
+			// Fetch subscription plans
+			const plansRes = await databases.listDocuments(
+				DB_ID,
+				"subscription_plans",
+			);
+			plans.value = plansRes.documents;
 
-      // Fetch current user's active subscription
-      const subsRes = await databases.listDocuments(
-        dbId,
-        "user_subscriptions",
-        [
-          Query.equal("userId", currentUser.value.$id),
-          Query.equal("status", "active"),
-          Query.orderDesc("$createdAt"),
-          Query.limit(1),
-        ],
-      );
+			// Fetch current user's active subscription
+			const subsRes = await databases.listDocuments(
+				DB_ID,
+				"user_subscriptions",
+				[
+					Query.equal("userId", currentUser.value.$id),
+					Query.equal("status", "active"),
+					Query.orderDesc("$createdAt"),
+					Query.limit(1),
+				],
+			);
 
-      if (subsRes.documents.length > 0) {
-        activeSubscription.value = subsRes.documents[0];
-      }
-    }
-  } catch (err) {
-    console.error("Failed to load subscription data", err);
-  } finally {
-    isLoading.value = false;
-  }
+			if (subsRes.documents.length > 0) {
+				activeSubscription.value = subsRes.documents[0];
+			}
+		}
+	} catch (err) {
+		console.error("Failed to load subscription data", err);
+	} finally {
+		isLoading.value = false;
+	}
 });
 
 const openHistoryModal = async () => {
-  isHistoryVisible.value = true;
-  isLoadingHistory.value = true;
+	isHistoryVisible.value = true;
+	isLoadingHistory.value = true;
 
-  try {
-    if (currentUser.value) {
-      const txRes = await databases.listDocuments(
-        dbId,
-        "user_subscription_transactions",
-        [
-          Query.equal("userId", currentUser.value.$id),
-          Query.orderDesc("transactionDate"),
-        ],
-      );
+	try {
+		if (currentUser.value) {
+			const txRes = await databases.listDocuments(
+				DB_ID,
+				"user_subscription_transactions",
+				[
+					Query.equal("userId", currentUser.value.$id),
+					Query.orderDesc("transactionDate"),
+				],
+			);
 
-      // Map plan IDs to plan names for better UX
-      transactions.value = txRes.documents.map((tx) => {
-        const plan = plans.value.find((p) => p.$id === tx.planId);
-        return {
-          ...tx,
-          planName: plan ? plan.name : tx.planId,
-        };
-      });
-    }
-  } catch (err) {
-    console.error("Failed to fetch history", err);
-  } finally {
-    isLoadingHistory.value = false;
-  }
+			// Map plan IDs to plan names for better UX
+			transactions.value = txRes.documents.map((tx) => {
+				const plan = plans.value.find((p) => p.$id === tx.planId);
+				return {
+					...tx,
+					planName: plan ? plan.name : tx.planId,
+				};
+			});
+		}
+	} catch (err) {
+		console.error("Failed to fetch history", err);
+	} finally {
+		isLoadingHistory.value = false;
+	}
 };
 
 const formatCurrency = (value) => {
-  if (value === undefined || value === null) return "-";
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
+	if (value === undefined || value === null) return "-";
+	return new Intl.NumberFormat("id-ID", {
+		style: "currency",
+		currency: "IDR",
+		minimumFractionDigits: 0,
+	}).format(value);
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  return new Date(dateString).toLocaleString("id-ID", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+	if (!dateString) return "-";
+	return new Date(dateString).toLocaleString("id-ID", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 };
 
 const getStatusSeverity = (status) => {
-  switch (status?.toLowerCase()) {
-    case "success":
-    case "paid":
-    case "active":
-      return "success";
-    case "pending":
-      return "warn";
-    case "failed":
-    case "cancelled":
-      return "danger";
-    default:
-      return "info";
-  }
+	switch (status?.toLowerCase()) {
+		case "success":
+		case "paid":
+		case "active":
+			return "success";
+		case "pending":
+			return "warn";
+		case "failed":
+		case "cancelled":
+			return "danger";
+		default:
+			return "info";
+	}
+};
+
+const handleSubscribeClick = (plan) => {
+	selectedPlan.value = plan;
+	if (plan.price === 0) {
+		isConfirmVisible.value = true;
+	} else {
+		isPaymentDialogVisible.value = true;
+	}
+};
+
+const proceedSubscription = async () => {
+	if (!selectedPlan.value || !currentUser.value) return;
+
+	isSubscribing.value = true;
+
+	try {
+		const now = new Date();
+		const expiredDate = new Date();
+		expiredDate.setDate(now.getDate() + 30); // 30 days subscription
+
+		// Create active subscription
+		const subDoc = await databases.createDocument(
+			DB_ID,
+			"user_subscriptions",
+			ID.unique(),
+			{
+				userId: currentUser.value.$id,
+				planId: selectedPlan.value.$id,
+				status: "active",
+				startDate: now.toISOString(),
+				expiredDate: expiredDate.toISOString(),
+			},
+		);
+
+		// Create transaction record
+		await databases.createDocument(
+			DB_ID,
+			"user_subscription_transactions",
+			ID.unique(),
+			{
+				userId: currentUser.value.$id,
+				planId: selectedPlan.value.$id,
+				amount: selectedPlan.value.price,
+				status: "success",
+				transactionDate: now.toISOString(),
+				referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
+			},
+		);
+
+		activeSubscription.value = subDoc;
+		authStore.setSubscriptionStatus(true);
+
+		isConfirmVisible.value = false;
+		toast.add({
+			severity: "success",
+			summary: "Success",
+			detail: "Successfully subscribed to " + selectedPlan.value.name,
+			life: 3000,
+		});
+	} catch (err) {
+		console.error("Subscription failed:", err);
+		toast.add({
+			severity: "error",
+			summary: "Error",
+			detail: "Failed to process subscription",
+			life: 3000,
+		});
+	} finally {
+		isSubscribing.value = false;
+	}
 };
 </script>
 

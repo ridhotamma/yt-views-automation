@@ -8,4 +8,7 @@ const client = new Client()
 
 export const account = new Account(client);
 export const databases = new Databases(client);
+
+export const DB_ID = "6a31a1b80021df02203f";
+
 export { client, ID, Query };
