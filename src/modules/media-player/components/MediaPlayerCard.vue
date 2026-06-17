@@ -12,7 +12,7 @@
       ></webview>
     </div>
     <div class="webview-container empty-bg" v-else>
-      <i class="pi pi-video" style="font-size: 2rem; color: var(--p-surface-500);"></i>
+      <i class="pi pi-video" style="font-size: 2rem; color: var(--app-text-muted);"></i>
     </div>
 
     <!-- Bottom Section: Controls -->
@@ -52,7 +52,7 @@
           {{ video }}
         </li>
       </ul>
-      <p v-else style="text-align: center; color: var(--p-surface-500); padding: 2rem 0;">No upcoming videos in queue.</p>
+      <p v-else style="text-align: center; color: var(--app-text-muted); padding: 2rem 0;">No upcoming videos in queue.</p>
     </Dialog>
 
     <!-- Delete Confirmation Modal -->
@@ -249,7 +249,7 @@ const proceedDelete = () => {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  background-color: var(--p-surface-900);
+  background-color: var(--app-card-bg);
 }
 
 .webview-container {
@@ -262,7 +262,7 @@ const proceedDelete = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--p-surface-800);
+  background-color: var(--app-border);
 }
 
 .controls-bar {
@@ -270,8 +270,8 @@ const proceedDelete = () => {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background-color: var(--p-surface-900);
-  border-top: 1px solid var(--p-surface-800);
+  background-color: var(--app-card-bg);
+  border-top: 1px solid var(--app-border);
   height: 50px;
 }
 
@@ -279,7 +279,7 @@ const proceedDelete = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--p-surface-300);
+  color: var(--app-text-muted);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -301,10 +301,10 @@ const proceedDelete = () => {
 
 .queue-item {
   word-break: break-all;
-  color: var(--p-surface-200);
+  color: var(--app-text);
   font-size: 0.9rem;
   padding: 0.75rem;
-  background-color: var(--p-surface-800);
+  background-color: var(--app-border);
   border-radius: 6px;
   display: flex;
   align-items: center;

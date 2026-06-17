@@ -190,12 +190,12 @@ onUnmounted(() => {
 
 .sidebar {
   width: 250px;
-  background-color: var(--p-surface-900, #1a1a1a);
-  color: var(--p-surface-0, #fff);
+  background-color: var(--app-sidebar-bg);
+  color: var(--app-text);
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
-  border-right: 1px solid var(--p-surface-700, #333);
+  border-right: 1px solid var(--app-border);
   position: relative;
 }
 
@@ -209,7 +209,7 @@ onUnmounted(() => {
   padding: 1rem;
   height: 70px;
   position: relative;
-  border-bottom: 1px solid var(--p-surface-700, #333);
+  border-bottom: 1px solid var(--app-border);
   overflow: hidden;
 }
 
@@ -271,7 +271,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: var(--p-surface-300, #aaa);
+  color: var(--app-text-muted);
   text-decoration: none;
   border-radius: 8px;
   transition: all 0.2s;
@@ -292,13 +292,13 @@ onUnmounted(() => {
 }
 
 .menu-item:not(.locked-menu-item):hover {
-  background-color: var(--p-surface-800, #2a2a2a);
-  color: var(--p-surface-0, #fff);
+  background-color: var(--app-hover);
+  color: var(--app-text);
 }
 
 .menu-item.active {
-  background-color: var(--p-primary-900, #450a0a);
-  color: var(--p-primary-400, #f87171);
+  background-color: var(--p-highlight-background);
+  color: var(--p-highlight-color);
 }
 
 .menu-icon {
@@ -318,7 +318,7 @@ onUnmounted(() => {
 
 .main-content {
   flex: 1;
-  background-color: var(--p-surface-950, #121212);
+  background-color: var(--app-bg);
   overflow-y: auto;
 }
 
@@ -328,7 +328,7 @@ onUnmounted(() => {
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  background-color: var(--p-surface-950, #121212);
+  background-color: var(--app-bg);
   color: var(--p-primary-500, #ef4444);
 }
 
@@ -339,7 +339,7 @@ onUnmounted(() => {
 
 .sidebar-footer {
   padding: 1rem;
-  border-top: 1px solid var(--p-surface-700, #333);
+  border-top: 1px solid var(--app-border);
 }
 
 .user-profile {
@@ -353,7 +353,7 @@ onUnmounted(() => {
 }
 
 .user-profile:hover {
-  background-color: var(--p-surface-800, #2a2a2a);
+  background-color: var(--app-hover);
 }
 
 .user-profile.collapsed {
@@ -378,7 +378,7 @@ onUnmounted(() => {
 .user-name {
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--p-surface-0, #fff);
+  color: var(--app-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -386,7 +386,7 @@ onUnmounted(() => {
 
 .user-email {
   font-size: 0.75rem;
-  color: var(--p-surface-400, #aaa);
+  color: var(--app-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -400,10 +400,11 @@ onUnmounted(() => {
   text-decoration: none;
   border-radius: 6px;
   transition: background-color 0.2s;
+  color: var(--app-text);
 }
 
 .popover-item:hover {
-  background-color: var(--p-surface-100, #f3f4f6);
+  background-color: var(--app-hover);
 }
 
 .logout-btn {
@@ -411,6 +412,6 @@ onUnmounted(() => {
 }
 
 .logout-btn:hover {
-  background-color: var(--p-surface-800, #2a2a2a);
+  background-color: var(--app-hover);
 }
 </style>

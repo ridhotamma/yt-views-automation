@@ -9,7 +9,7 @@
       <div class="setting-item">
         <div class="setting-info">
           <h3>{{ $t('settings.theme') }}</h3>
-          <p style="color: var(--p-surface-400); margin-top: 0.25rem;">Choose your preferred appearance.</p>
+          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">Choose your preferred appearance.</p>
         </div>
         <div class="setting-action">
           <SelectButton
@@ -33,7 +33,7 @@
       <div class="setting-item">
         <div class="setting-info">
           <h3>{{ $t('settings.language') }}</h3>
-          <p style="color: var(--p-surface-400); margin-top: 0.25rem;">Select the application language.</p>
+          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">Select the application language.</p>
         </div>
         <div class="setting-action">
           <SelectButton
@@ -96,10 +96,10 @@ watch(locale, (newLocale) => {
 }
 
 .settings-content {
-  background-color: var(--p-surface-900);
+  background-color: var(--app-card-bg);
   border-radius: 16px;
   padding: 2rem;
-  border: 1px solid var(--p-surface-800);
+  border: 1px solid var(--app-border);
 }
 
 .setting-item {
@@ -112,7 +112,7 @@ watch(locale, (newLocale) => {
 .setting-info h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--p-surface-0);
+  color: var(--app-text);
 }
 
 @media screen and (max-width: 768px) {

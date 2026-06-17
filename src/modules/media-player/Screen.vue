@@ -452,9 +452,9 @@ const handleUpdateState = async (player, newState) => {
   grid-column: 1 / -1;
   text-align: center;
   padding: 4rem 2rem;
-  background-color: var(--p-surface-900);
+  background-color: var(--app-card-bg);
   border-radius: 8px;
-  color: var(--p-surface-400);
+  color: var(--app-text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -463,7 +463,7 @@ const handleUpdateState = async (player, newState) => {
 
 .empty-icon {
   font-size: 3rem;
-  color: var(--p-surface-500);
+  color: var(--app-text-muted);
 }
 
 .form-group {

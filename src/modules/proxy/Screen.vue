@@ -259,7 +259,7 @@ const deleteProxy = async () => {
 }
 
 .table-container {
-  background-color: var(--p-surface-900);
+  background-color: var(--app-card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -268,7 +268,7 @@ const deleteProxy = async () => {
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: var(--p-surface-400);
+  color: var(--app-text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -277,6 +277,7 @@ const deleteProxy = async () => {
 
 .empty-icon {
   font-size: 3rem;
-  color: var(--p-surface-500);
+  color: var(--app-text-muted);
+  margin-bottom: 1rem;
 }
 </style>

@@ -49,7 +49,7 @@
           </div>
           <div
             style="
-              color: var(--p-surface-400);
+              color: var(--app-text-muted);
               font-size: 0.9rem;
               margin-top: 0.5rem;
             "
@@ -167,7 +167,7 @@
           "
         ></i>
         <p>Payment integration (Mayar.id) is currently under development.</p>
-        <p style="color: var(--p-surface-400); font-size: 0.9rem">
+        <p style="color: var(--app-text-muted); font-size: 0.9rem">
           Payment link is not configured for this plan yet. Please try a free
           plan or check back later!
         </p>
@@ -535,12 +535,12 @@ const proceedSubscription = async () => {
 }
 
 .plan-card {
-  background-color: var(--p-surface-900);
+  background-color: var(--app-card-bg);
   border-radius: 16px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--p-surface-800);
+  border: 1px solid var(--app-border);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -549,7 +549,6 @@ const proceedSubscription = async () => {
 
 .plan-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   border-color: var(--p-primary-500);
 }
 
@@ -562,7 +561,7 @@ const proceedSubscription = async () => {
 .plan-header h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--p-surface-0);
+  color: var(--app-text);
 }
 
 .price {
@@ -587,10 +586,10 @@ const proceedSubscription = async () => {
 
 .features-list li {
   padding: 0.75rem 0;
-  color: var(--p-surface-300);
+  color: var(--app-text-muted);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--p-surface-800);
+  border-bottom: 1px solid var(--app-border);
 }
 
 .features-list li:last-child {
@@ -616,19 +615,19 @@ const proceedSubscription = async () => {
 
 .empty-icon {
   font-size: 3.5rem;
-  color: var(--p-surface-500);
+  color: var(--app-text-muted);
   margin-bottom: 1rem;
 }
 
 .empty-state h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
-  color: var(--p-surface-100);
+  color: var(--app-text);
 }
 
 .empty-state p {
   margin: 0;
-  color: var(--p-surface-400);
+  color: var(--app-text-muted);
 }
 
 @media screen and (max-width: 768px) {

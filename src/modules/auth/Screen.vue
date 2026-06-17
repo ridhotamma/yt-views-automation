@@ -44,18 +44,18 @@ const handleGoogleLogin = () => {
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  background-color: var(--p-surface-950, #121212);
+  background-color: var(--app-bg);
   padding: 1rem;
 }
 
 .auth-card {
   width: 100%;
   max-width: 400px;
-  background-color: var(--p-surface-900, #1a1a1a);
+  background-color: var(--app-card-bg);
   padding: 2.5rem;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--p-surface-700, #333);
+  border: 1px solid var(--app-border);
 }
 
 .auth-header {
@@ -65,7 +65,7 @@ const handleGoogleLogin = () => {
 
 .auth-header p {
   margin: 0.5rem 0 0;
-  color: var(--p-surface-400, #aaa);
+  color: var(--app-text-muted);
 }
 
 .auth-brand {
@@ -82,7 +82,7 @@ const handleGoogleLogin = () => {
 .brand-title {
   font-weight: 700;
   font-size: 2rem;
-  color: var(--p-primary-500, #ef4444);
+  color: var(--app-primary);
 }
 
 .auth-logo {
@@ -94,12 +94,12 @@ const handleGoogleLogin = () => {
 .auth-header h2 {
   margin: 0;
   font-size: 1.75rem;
-  color: var(--p-surface-0, #fff);
+  color: var(--app-text-main);
 }
 
 .auth-header p {
   margin: 0.5rem 0 0;
-  color: var(--p-surface-400, #aaa);
+  color: var(--app-text-muted);
 }
 
 .w-full {
