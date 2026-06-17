@@ -106,6 +106,7 @@ export default async ({ req, res, log, error }) => {
 		// ROUTE: Mayar Webhook
 		// ==========================================
 		log("Received Mayar Webhook");
+		log("Request Headers: " + JSON.stringify(req.headers, null, 2));
 
 		const expectedToken = process.env.MAYAR_WEBHOOK_TOKEN;
 		if (expectedToken) {
@@ -117,7 +118,6 @@ export default async ({ req, res, log, error }) => {
 		}
 
 		log("Request Body: " + JSON.stringify(body, null, 2));
-		log("Request Headers: " + JSON.stringify(req.headers, null, 2));
 
 		if (!body || !body.event) {
 			return res.json(
