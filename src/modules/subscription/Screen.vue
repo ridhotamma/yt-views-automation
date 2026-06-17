@@ -19,6 +19,10 @@
       </div>
     </div>
 
+    <!-- Current Plan Banner -->
+    <Message v-if="currentPlanDetails" severity="secondary" :closable="false" style="margin-bottom: 2rem; font-size: 0.9rem; padding: 0.75rem 1rem;">
+      Your current plan is <strong>{{ currentPlanDetails.name }}</strong><span v-if="currentPlanDetails.planType !== 'free_plan'">, and will be expired at <strong>{{ currentPlanDetails.expiredDate }}</strong></span>.
+    </Message>
     <!-- Plans Section -->
     <div v-if="isLoading" class="plans-grid">
       <Skeleton
@@ -86,10 +90,10 @@
     <!-- Transaction History Dialog -->
     <Dialog
       v-model:visible="isHistoryVisible"
-      maximized
       modal
       header="Transaction History"
       :style="{ width: '75vw', height: '75vh' }"
+      class="responsive-dialog"
     >
       <div style="padding: 1rem 0">
         <div v-if="isLoadingHistory">
@@ -181,20 +185,19 @@
     <!-- Payment Webview Dialog -->
     <Dialog
       v-model:visible="isPaymentWebviewVisible"
-      maximized
       modal
       header="Secure Payment"
       :closable="true"
+      :style="{ width: '50vw', height: '80vh' }"
       :contentStyle="{
         padding: 0,
         overflow: 'hidden',
-        height: '80vh',
-        width: '40vw',
         display: 'flex',
         flexDirection: 'column',
       }"
+      class="responsive-dialog"
     >
-      <iframe
+      <webview
         v-if="activePaymentUrl"
         :src="activePaymentUrl"
         style="
@@ -204,8 +207,7 @@
           border: none;
           background: #fff;
         "
-        allow="payment"
-      ></iframe>
+      ></webview>
     </Dialog>
 
     <!-- Toast for Notifications -->
@@ -223,12 +225,12 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Toast from "primevue/toast";
+import Message from "primevue/message";
 import { useToast } from "primevue/usetoast";
 import {
 	databases,
 	functions,
 	Query,
-	ID,
 	DB_ID,
 	client,
 } from "../../lib/appwrite.js";
@@ -264,6 +266,34 @@ const isPremiumActive = computed(() => {
 		(p) => p.$id === activeSubscription.value.planId,
 	);
 	return currentPlan && currentPlan.planType === "paid_plan";
+});
+
+const currentPlanDetails = computed(() => {
+	if (!activeSubscription.value || plans.value.length === 0) return null;
+	const plan = plans.value.find(
+		(p) => p.$id === activeSubscription.value.planId,
+	);
+	if (!plan) return null;
+
+	const start = new Date(activeSubscription.value.startDate);
+	const end = new Date(activeSubscription.value.expiredDate);
+	
+	const formatDate = (date) => {
+		return new Intl.DateTimeFormat("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		}).format(date);
+	};
+
+	return {
+		name: plan.name,
+		status: activeSubscription.value.status,
+		startDate: formatDate(start),
+		expiredDate: formatDate(end),
+		billingCycle: activeSubscription.value.paymentCycle || "monthly",
+		planType: plan.planType,
+	};
 });
 
 let realtimeUnsubscribe = null;
@@ -415,64 +445,19 @@ const getStatusSeverity = (status) => {
 
 const handleSubscribeClick = async (plan) => {
 	selectedPlan.value = plan;
-	const currentPrice =
-		billingCycle.value === "monthly" ? plan.priceMonthly : plan.priceAnnually;
-
 	if (plan.planType === "free_plan") {
 		await proceedSubscription();
 	} else {
 		const paymentLink =
 			billingCycle.value === "monthly"
-				? plan.paymentIframeMonthly || plan.paymentLinkMonthly
-				: plan.paymentIframeAnnually || plan.paymentLinkAnnually;
+				? plan.paymentLinkMonthly
+				: plan.paymentLinkAnnually;
 		if (paymentLink) {
-			try {
-				let finalUrlStr = "";
-
-				if (paymentLink.includes("<iframe")) {
-					const parser = new DOMParser();
-					const doc = parser.parseFromString(paymentLink, "text/html");
-					const iframe = doc.querySelector("iframe");
-
-					if (iframe && iframe.src) {
-						const url = new URL(iframe.src);
-						for (const attr of iframe.attributes) {
-							if (attr.name.startsWith("data-")) {
-								const paramName = attr.name.replace("data-", "");
-								url.searchParams.set(paramName, attr.value);
-							}
-						}
-						url.searchParams.set("name", currentUser.value?.name || "User");
-						url.searchParams.set("email", currentUser.value?.email || "");
-						finalUrlStr = url.toString();
-					} else {
-						throw new Error("Iframe tag found but no src attribute");
-					}
-				} else {
-					let finalLink = paymentLink;
-					if (
-						!finalLink.startsWith("http://") &&
-						!finalLink.startsWith("https://")
-					) {
-						finalLink = "https://" + finalLink;
-					}
-					const url = new URL(finalLink);
-					url.searchParams.set("name", currentUser.value?.name || "User");
-					url.searchParams.set("email", currentUser.value?.email || "");
-					finalUrlStr = url.toString();
-				}
-
-				activePaymentUrl.value = finalUrlStr;
-				isPaymentWebviewVisible.value = true;
-			} catch (err) {
-				console.error("Invalid payment link:", paymentLink, err);
-				toast.add({
-					severity: "error",
-					summary: "Error",
-					detail: "Invalid payment link configuration",
-					life: 3000,
-				});
-			}
+			const url = new URL(paymentLink);
+			url.searchParams.set("name", currentUser.value.name);
+			url.searchParams.set("email", currentUser.value.email);
+			activePaymentUrl.value = url.toString();
+			isPaymentWebviewVisible.value = true;
 		} else {
 			isPaymentDialogVisible.value = true;
 		}
@@ -644,5 +629,16 @@ const proceedSubscription = async () => {
 .empty-state p {
   margin: 0;
   color: var(--p-surface-400);
+}
+
+@media screen and (max-width: 768px) {
+  :deep(.responsive-dialog) {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
 }
 </style>
