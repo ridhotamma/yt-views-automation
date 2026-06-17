@@ -110,8 +110,8 @@ export default async ({ req, res, log, error }) => {
 
 		const expectedToken = process.env.MAYAR_WEBHOOK_TOKEN;
 		if (expectedToken) {
-			const authHeader = req.headers["authorization"] || "";
-			if (authHeader !== `Bearer ${expectedToken}`) {
+			const callbackToken = req.headers["x-callback-token"] || "";
+			if (callbackToken !== expectedToken) {
 				error("Unauthorized webhook attempt. Invalid token.");
 				return res.json({ success: false, message: "Unauthorized" }, 401);
 			}
