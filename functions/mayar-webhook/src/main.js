@@ -91,7 +91,7 @@ export default async ({ req, res, log, error }) => {
 				{
 					userId: userId,
 					planId: planId,
-					amount: planDoc.priceMonthly,
+					amount: billingCycle === "monthly" ? planDoc.priceMonthly : planDoc.priceAnnually,
 					status: "success",
 					transactionDate: now.toISOString(),
 					referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
