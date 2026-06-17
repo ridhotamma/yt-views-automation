@@ -6,11 +6,11 @@
           <img src="/images/logo.png" alt="Logo" class="auth-logo" />
           <span class="brand-title font-britney">Youtumate</span>
         </div>
-        <h2>Welcome back</h2>
-        <p>Sign in to your Youtumate account</p>
+        <h2>{{ $t('auth.welcomeBack') }}</h2>
+        <p>{{ $t('auth.signInDesc') }}</p>
       </div>
 
-      <Button label="Sign in with Google" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
+      <Button :label="$t('auth.signInGoogle')" icon="pi pi-google" severity="secondary" outlined class="w-full" @click="handleGoogleLogin" />
       <Message v-if="authError" severity="error" size="small" variant="simple" style="margin-top: 1rem; display: block; text-align: center;">{{ authError }}</Message>
     </div>
   </div>
@@ -23,7 +23,9 @@ import { OAuthProvider } from "appwrite";
 
 import Button from "primevue/button";
 import Message from "primevue/message";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const authError = ref("");
 
 const handleGoogleLogin = () => {
@@ -32,7 +34,7 @@ const handleGoogleLogin = () => {
 		const failureUrl = window.location.origin + "/login";
 		account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
 	} catch (error) {
-		authError.value = "Failed to initialize Google login.";
+		authError.value = t("auth.failedGoogle");
 	}
 };
 </script>

@@ -5,7 +5,7 @@
       <div style="display: flex; gap: 1rem; align-items: center">
         <SelectButton
           v-model="billingCycle"
-          :options="billingOptions"
+          :options="[{ label: $t('subscriptions.monthly'), value: 'monthly' }, { label: $t('subscriptions.annually'), value: 'annually' }]"
           optionLabel="label"
           optionValue="value"
           :allowEmpty="false"
@@ -21,7 +21,8 @@
 
     <!-- Current Plan Banner -->
     <Message v-if="currentPlanDetails" severity="secondary" :closable="false" style="margin-bottom: 2rem; font-size: 0.9rem; padding: 0.75rem 1rem;">
-      Your current plan is <strong>{{ currentPlanDetails.name }}</strong><span v-if="currentPlanDetails.planType !== 'free_plan'">, and will be expired at <strong>{{ currentPlanDetails.expiredDate }}</strong></span>.
+      <span v-if="currentPlanDetails.planType !== 'free_plan'" v-html="$t('subscriptions.currentPlanDesc', { name: `<strong>${currentPlanDetails.name}</strong>`, date: `<strong>${currentPlanDetails.expiredDate}</strong>` })"></span>
+      <span v-else v-html="$t('subscriptions.currentPlanDescNoDate', { name: `<strong>${currentPlanDetails.name}</strong>` })"></span>
     </Message>
     <!-- Plans Section -->
     <div v-if="isLoading" class="plans-grid">
@@ -54,7 +55,7 @@
               margin-top: 0.5rem;
             "
           >
-            / {{ billingCycle === "monthly" ? "month" : "year" }}
+            / {{ billingCycle === "monthly" ? $t('subscriptions.month') : $t('subscriptions.year') }}
           </div>
         </div>
 
@@ -91,7 +92,7 @@
     <Dialog
       v-model:visible="isHistoryVisible"
       modal
-      header="Transaction History"
+      :header="$t('subscriptions.transactionHistory')"
       :style="{ width: '75vw', height: '75vh' }"
       class="responsive-dialog"
     >
@@ -114,22 +115,22 @@
           <template #empty>
             <div class="empty-state">
               <i class="pi pi-receipt empty-icon"></i>
-              <h3>No Transactions Yet</h3>
-              <p>You haven't made any subscription transactions.</p>
+              <h3>{{ $t('subscriptions.noTransactions') }}</h3>
+              <p>{{ $t('subscriptions.noTransactionsDesc') }}</p>
             </div>
           </template>
-          <Column field="transactionDate" header="Date">
+          <Column field="transactionDate" :header="$t('subscriptions.date')">
             <template #body="{ data }">
               {{ formatDate(data.transactionDate) }}
             </template>
           </Column>
-          <Column field="planName" header="Plan Name"></Column>
-          <Column field="amount" header="Amount">
+          <Column field="planName" :header="$t('subscriptions.planName')"></Column>
+          <Column field="amount" :header="$t('subscriptions.amount')">
             <template #body="{ data }">
               {{ formatCurrency(data.amount) }}
             </template>
           </Column>
-          <Column field="status" header="Status">
+          <Column field="status" :header="$t('subscriptions.status')">
             <template #body="{ data }">
               <Tag
                 :value="data.status"
@@ -137,7 +138,7 @@
               />
             </template>
           </Column>
-          <Column field="referenceId" header="Reference ID"></Column>
+          <Column field="referenceId" :header="$t('subscriptions.referenceId')"></Column>
         </DataTable>
       </div>
     </Dialog>
@@ -146,7 +147,7 @@
     <Dialog
       v-model:visible="isPaymentDialogVisible"
       modal
-      header="Coming Soon"
+      :header="$t('subscriptions.comingSoon')"
       :style="{ width: '400px' }"
     >
       <div
@@ -166,15 +167,14 @@
             margin-bottom: 1rem;
           "
         ></i>
-        <p>Payment integration (Mayar.id) is currently under development.</p>
+        <p>{{ $t('subscriptions.paymentUnderDev') }}</p>
         <p style="color: var(--app-text-muted); font-size: 0.9rem">
-          Payment link is not configured for this plan yet. Please try a free
-          plan or check back later!
+          {{ $t('subscriptions.paymentNotConfigured') }}
         </p>
       </div>
       <template #footer>
         <Button
-          label="Close"
+          :label="$t('common.close')"
           text
           @click="isPaymentDialogVisible = false"
           class="w-full"
@@ -186,7 +186,7 @@
     <Dialog
       v-model:visible="isPaymentWebviewVisible"
       modal
-      header="Secure Payment"
+      :header="$t('subscriptions.securePayment')"
       :closable="true"
       :style="{ width: '50vw', height: '80vh' }"
       :contentStyle="{
@@ -241,10 +241,6 @@ const plans = ref([]);
 const activeSubscription = ref(null);
 
 const billingCycle = ref("monthly");
-const billingOptions = ref([
-	{ label: "Monthly", value: "monthly" },
-	{ label: "Annually", value: "annually" },
-]);
 
 const isHistoryVisible = ref(false);
 const isLoadingHistory = ref(false);

@@ -1,8 +1,8 @@
 <template>
   <div class="screen-container">
     <div class="header-actions">
-      <h1>Proxy Management</h1>
-      <Button label="Create Proxy" icon="pi pi-plus" @click="openCreateModal" />
+      <h1>{{ $t('proxy.title') }}</h1>
+      <Button :label="$t('proxy.createProxy')" icon="pi pi-plus" @click="openCreateModal" />
     </div>
 
     <div class="table-container">
@@ -16,32 +16,32 @@
         <template #empty>
           <div class="empty-state" v-if="!isLoading">
             <i class="pi pi-server empty-icon"></i>
-            <p>No proxies found. Create one to get started!</p>
+            <p>{{ $t('proxy.noProxies') }}</p>
           </div>
         </template>
         
-        <Column field="name" header="Name">
+        <Column field="name" :header="$t('proxy.name')">
           <template #body="slotProps">
             <Skeleton v-if="isLoading" width="100%" />
             <span v-else>{{ slotProps.data.name }}</span>
           </template>
         </Column>
 
-        <Column field="ipAddress" header="IP Address / Host">
+        <Column field="ipAddress" :header="$t('proxy.ipHost')">
           <template #body="slotProps">
             <Skeleton v-if="isLoading" width="100%" />
             <span v-else>{{ slotProps.data.ipAddress }}</span>
           </template>
         </Column>
 
-        <Column field="createdAt" header="Created At">
+        <Column field="createdAt" :header="$t('proxy.createdAt')">
           <template #body="slotProps">
             <Skeleton v-if="isLoading" width="100%" />
             <span v-else>{{ slotProps.data.createdAt }}</span>
           </template>
         </Column>
 
-        <Column header="Actions" :exportable="false" style="min-width:8rem">
+        <Column :header="$t('common.actions')" :exportable="false" style="min-width:8rem">
           <template #body="slotProps">
             <div style="display: flex; gap: 0.5rem;" v-if="!isLoading">
               <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openEditModal(slotProps.data)" />
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <Dialog v-model:visible="isModalVisible" modal :header="modalMode === 'create' ? 'Create New Proxy' : 'Edit Proxy'" :style="{ width: '450px' }" @hide="resetForm">
+    <Dialog v-model:visible="isModalVisible" modal :header="modalMode === 'create' ? $t('proxy.createProxy') : $t('proxy.editProxy')" :style="{ width: '450px' }" @hide="resetForm">
       <Form id="proxyForm" :resolver="resolver" :initialValues="form" @submit="onFormSubmit" class="form-container" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
         <div>
           <FormField name="name" v-slot="$field">
@@ -86,13 +86,13 @@
     </Dialog>
 
     <!-- Delete Confirmation Modal -->
-    <Dialog v-model:visible="isDeleteModalVisible" modal header="Confirm Delete" :style="{ width: '350px' }">
+    <Dialog v-model:visible="isDeleteModalVisible" modal :header="$t('common.confirmDelete')" :style="{ width: '350px' }">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <span>Are you sure you want to delete <b>{{ proxyToDelete?.name }}</b>?</span>
+        <span>{{ $t('common.deleteConfirmation', { name: proxyToDelete?.name }) }}</span>
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="isDeleteModalVisible = false" autofocus />
-        <Button label="Yes" icon="pi pi-check" severity="danger" @click="deleteProxy" />
+        <Button :label="$t('common.cancel')" icon="pi pi-times" text @click="isDeleteModalVisible = false" autofocus />
+        <Button :label="$t('common.delete')" icon="pi pi-check" severity="danger" @click="deleteProxy" />
       </template>
     </Dialog>
   </div>
@@ -262,7 +262,6 @@ const deleteProxy = async () => {
   background-color: var(--app-card-bg);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .empty-state {

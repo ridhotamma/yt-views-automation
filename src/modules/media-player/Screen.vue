@@ -1,8 +1,8 @@
 <template>
   <div class="screen-container">
     <div class="header-actions">
-      <h1>Media Player</h1>
-      <Button label="Create" icon="pi pi-plus" @click="isModalVisible = true" />
+      <h1>{{ $t('mediaPlayer.title') }}</h1>
+      <Button :label="$t('mediaPlayer.newQueue')" icon="pi pi-plus" @click="isModalVisible = true" />
     </div>
 
     <div class="players-grid">
@@ -28,7 +28,7 @@
         />
         <div v-if="players.length === 0" class="empty-state">
           <i class="pi pi-video empty-icon"></i>
-          <p>No media players running. Create one to get started!</p>
+          <p>{{ $t('mediaPlayer.noPlayers') }}</p>
         </div>
       </template>
     </div>
@@ -36,7 +36,7 @@
     <Dialog
       v-model:visible="isModalVisible"
       modal
-      header="Create New Media Player"
+      :header="$t('mediaPlayer.newQueue')"
       :style="{ width: '500px' }"
       @hide="resetForm"
     >
@@ -57,7 +57,7 @@
               style="width: 100%"
               showClear
             />
-            <label for="proxy-select">Proxy (Optional)</label>
+            <label for="proxy-select">{{ $t('mediaPlayer.proxy') }}</label>
           </FloatLabel>
           <FloatLabel variant="on" style="flex: 1">
             <Select
@@ -68,7 +68,7 @@
               optionValue="value"
               style="width: 100%"
             />
-            <label for="ua-select">Device / User Agent</label>
+            <label for="ua-select">{{ $t('mediaPlayer.userAgent') }}</label>
           </FloatLabel>
         </div>
 
@@ -82,7 +82,7 @@
           <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1">
             <ToggleSwitch inputId="isLooping" v-model="isLooping" />
             <label for="isLooping" style="font-weight: 600; cursor: pointer"
-              >Enable Looping</label
+              >{{ $t('mediaPlayer.enableLooping') }}</label
             >
           </div>
 
@@ -96,7 +96,7 @@
                 :max="1000"
                 :disabled="!isLooping"
               />
-              <label for="loopCount">Loop Count (0 = Infinite)</label>
+              <label for="loopCount">{{ $t('mediaPlayer.loopCount') }} (0 = Infinite)</label>
             </FloatLabel>
           </div>
         </div>
@@ -155,7 +155,7 @@
         >
 
         <Button
-          label="Add New URL"
+          :label="$t('mediaPlayer.addUrl')"
           icon="pi pi-plus"
           outlined
           style="width: 100%; margin-top: 0.5rem"
@@ -169,13 +169,13 @@
 
       <template #footer>
         <Button
-          label="Cancel"
+          :label="$t('common.cancel')"
           text
           severity="secondary"
           @click="isModalVisible = false"
           autofocus
         />
-        <Button label="Create" type="submit" form="playerForm" />
+        <Button :label="$t('mediaPlayer.addToQueue')" type="submit" form="playerForm" />
       </template>
     </Dialog>
   </div>

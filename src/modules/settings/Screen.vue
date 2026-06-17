@@ -9,7 +9,7 @@
       <div class="setting-item">
         <div class="setting-info">
           <h3>{{ $t('settings.theme') }}</h3>
-          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">Choose your preferred appearance.</p>
+          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">{{ $t('settings.appearanceDesc') }}</p>
         </div>
         <div class="setting-action">
           <SelectButton
@@ -33,7 +33,7 @@
       <div class="setting-item">
         <div class="setting-info">
           <h3>{{ $t('settings.language') }}</h3>
-          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">Select the application language.</p>
+          <p style="color: var(--app-text-muted); margin-top: 0.25rem;">{{ $t('settings.languageDesc') }}</p>
         </div>
         <div class="setting-action">
           <SelectButton

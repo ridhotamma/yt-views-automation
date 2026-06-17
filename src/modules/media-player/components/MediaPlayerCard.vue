@@ -18,17 +18,17 @@
     <!-- Bottom Section: Controls -->
     <div class="controls-bar">
       <div style="display: flex; gap: 1rem; align-items: center;">
-        <div class="queue-info" role="button" tabindex="0" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true" @keydown.enter="isQueueModalVisible = true" @keydown.space.prevent="isQueueModalVisible = true">
+        <div class="queue-info" role="button" tabindex="0" v-tooltip.top="$t('mediaPlayer.card.viewUpcoming')" @click="isQueueModalVisible = true" @keydown.enter="isQueueModalVisible = true" @keydown.space.prevent="isQueueModalVisible = true">
           <i class="pi pi-list"></i>
-          <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
+          <span>{{ $t('mediaPlayer.card.queueLeft', { count: youtubeUrls.length - currentQueue }) }}</span>
         </div>
         <div v-if="localUserAgent" class="queue-info" v-tooltip.top="localUserAgent" style="cursor: help;">
           <i class="pi pi-desktop"></i>
-          <span>Spoofed</span>
+          <span>{{ $t('mediaPlayer.card.spoofed') }}</span>
         </div>
-        <div v-if="youtubeUrls.length - currentQueue <= 0" class="queue-info" role="button" tabindex="0" v-tooltip.top="'Restart Player'" @click="restartPlayer" @keydown.enter="restartPlayer" @keydown.space.prevent="restartPlayer">
+        <div v-if="youtubeUrls.length - currentQueue <= 0" class="queue-info" role="button" tabindex="0" v-tooltip.top="$t('mediaPlayer.card.restartPlayer')" @click="restartPlayer" @keydown.enter="restartPlayer" @keydown.space.prevent="restartPlayer">
           <i class="pi pi-refresh"></i>
-          <span>Restart</span>
+          <span>{{ $t('mediaPlayer.card.restart') }}</span>
         </div>
       </div>
       <Button 
@@ -36,14 +36,14 @@
         severity="danger" 
         text
         rounded 
-        aria-label="Delete Player"
-        v-tooltip.top="'Delete Player'"
+        :aria-label="$t('mediaPlayer.card.deletePlayer')"
+        v-tooltip.top="$t('mediaPlayer.card.deletePlayer')"
         @click="confirmDelete" 
       />
     </div>
 
     <!-- Queue Modal -->
-    <Dialog v-model:visible="isQueueModalVisible" modal header="Upcoming Videos" :style="{ width: '450px' }">
+    <Dialog v-model:visible="isQueueModalVisible" modal :header="$t('mediaPlayer.card.upcomingVideos')" :style="{ width: '450px' }">
       <ul class="queue-list" v-if="youtubeUrls.length > 0">
         <li v-for="(video, index) in youtubeUrls" :key="index" class="queue-item" :class="{ 'active-item': index === currentQueue, 'played-item': index < currentQueue }">
           <i v-if="index === currentQueue" class="pi pi-play" style="margin-right: 0.5rem; color: var(--p-primary-color);"></i>
@@ -52,17 +52,17 @@
           {{ video }}
         </li>
       </ul>
-      <p v-else style="text-align: center; color: var(--app-text-muted); padding: 2rem 0;">No upcoming videos in queue.</p>
+      <p v-else style="text-align: center; color: var(--app-text-muted); padding: 2rem 0;">{{ $t('mediaPlayer.noVideos') }}</p>
     </Dialog>
 
     <!-- Delete Confirmation Modal -->
-    <Dialog v-model:visible="isDeleteModalVisible" modal header="Confirm Delete" :style="{ width: '350px' }">
+    <Dialog v-model:visible="isDeleteModalVisible" modal :header="$t('common.confirmDelete')" :style="{ width: '350px' }">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <span>Are you sure you want to delete this media player?</span>
+        <span>{{ $t('mediaPlayer.card.confirmDelete') }}</span>
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="isDeleteModalVisible = false" autofocus />
-        <Button label="Yes" icon="pi pi-check" severity="danger" @click="proceedDelete" />
+        <Button :label="$t('common.no')" icon="pi pi-times" text @click="isDeleteModalVisible = false" autofocus />
+        <Button :label="$t('common.yes')" icon="pi pi-check" severity="danger" @click="proceedDelete" />
       </template>
     </Dialog>
   </div>
