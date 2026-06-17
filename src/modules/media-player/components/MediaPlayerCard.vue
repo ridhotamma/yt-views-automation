@@ -5,7 +5,7 @@
       <webview 
         ref="webviewRef"
         :partition="partitionName"
-        :useragent="userAgent"
+        :useragent="localUserAgent"
         style="width: 100%; height: 100%; border: none;"
         webpreferences="autoplayPolicy=no-user-gesture-required"
         @dom-ready="onDomReady"
@@ -22,7 +22,7 @@
           <i class="pi pi-list"></i>
           <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
         </div>
-        <div v-if="userAgent" class="queue-info" v-tooltip.top="userAgent" style="cursor: help;">
+        <div v-if="localUserAgent" class="queue-info" v-tooltip.top="localUserAgent" style="cursor: help;">
           <i class="pi pi-desktop"></i>
           <span>Spoofed</span>
         </div>
@@ -72,6 +72,7 @@
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
+import { generateUserAgent } from "../../../utils/userAgent.js";
 
 const props = defineProps({
 	id: String,
@@ -88,9 +89,23 @@ const emit = defineEmits(["stop", "update-state"]);
 
 const currentIndex = ref(props.currentQueue || 0);
 const currentLoopIndex = ref(props.currentLoop || 0);
+const localUserAgent = ref(props.userAgent);
 const currentVideo = computed(
 	() => props.youtubeUrls[currentIndex.value] || null,
 );
+
+const refreshUserAgent = () => {
+	let type = "random";
+	if (localUserAgent.value) {
+		if (localUserAgent.value.includes("Windows NT")) type = "windows";
+		else if (localUserAgent.value.includes("Mac OS X")) type = "macos";
+		else if (localUserAgent.value.includes("iPhone")) type = "iphone";
+		else if (localUserAgent.value.includes("Android")) type = "android";
+	}
+	const newUa = generateUserAgent(type);
+	localUserAgent.value = newUa;
+	return newUa;
+};
 
 const isQueueModalVisible = ref(false);
 const isDeleteModalVisible = ref(false);
@@ -137,11 +152,13 @@ const playNext = () => {
 			props.isLooping &&
 			(props.loopCount === 0 || currentLoopIndex.value < props.loopCount)
 		) {
+			const newUa = refreshUserAgent();
 			currentIndex.value = 0;
 			currentLoopIndex.value++;
 			emit("update-state", {
 				currentQueue: 0,
 				currentLoop: currentLoopIndex.value,
+				userAgent: newUa,
 			});
 		} else {
 			currentIndex.value++;
@@ -151,9 +168,10 @@ const playNext = () => {
 };
 
 const restartPlayer = () => {
+	const newUa = refreshUserAgent();
 	currentIndex.value = 0;
 	currentLoopIndex.value = 0;
-	emit("update-state", { currentQueue: 0, currentLoop: 0 });
+	emit("update-state", { currentQueue: 0, currentLoop: 0, userAgent: newUa });
 };
 
 const onDomReady = async (event) => {
