@@ -26,6 +26,10 @@
           <i class="pi pi-desktop"></i>
           <span>Spoofed</span>
         </div>
+        <div v-if="youtubeUrls.length - currentQueue <= 0" class="queue-info" v-tooltip.top="'Restart Player'" @click="restartPlayer">
+          <i class="pi pi-refresh"></i>
+          <span>Restart</span>
+        </div>
       </div>
       <Button 
         icon="pi pi-trash" 
@@ -75,11 +79,15 @@ const props = defineProps({
 	currentQueue: Number,
 	proxyIp: String,
 	userAgent: String,
+	isLooping: Boolean,
+	loopCount: Number,
+	currentLoop: Number,
 });
 
-const emit = defineEmits(["stop", "update:currentQueue"]);
+const emit = defineEmits(["stop", "update-state"]);
 
 const currentIndex = ref(props.currentQueue || 0);
+const currentLoopIndex = ref(props.currentLoop || 0);
 const currentVideo = computed(
 	() => props.youtubeUrls[currentIndex.value] || null,
 );
@@ -118,10 +126,26 @@ onMounted(async () => {
 });
 
 const playNext = () => {
-	if (currentIndex.value < props.youtubeUrls.length) {
+	if (currentIndex.value < props.youtubeUrls.length - 1) {
 		currentIndex.value++;
-		emit("update:currentQueue", currentIndex.value);
+		emit("update-state", { currentQueue: currentIndex.value });
+	} else {
+		// End of queue
+		if (props.isLooping && (props.loopCount === 0 || currentLoopIndex.value < props.loopCount)) {
+			currentIndex.value = 0;
+			currentLoopIndex.value++;
+			emit("update-state", { currentQueue: 0, currentLoop: currentLoopIndex.value });
+		} else {
+			currentIndex.value++;
+			emit("update-state", { currentQueue: currentIndex.value });
+		}
 	}
+};
+
+const restartPlayer = () => {
+	currentIndex.value = 0;
+	currentLoopIndex.value = 0;
+	emit("update-state", { currentQueue: 0, currentLoop: 0 });
 };
 
 const onDomReady = async (event) => {

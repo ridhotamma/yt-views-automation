@@ -20,8 +20,11 @@
           :currentQueue="player.currentQueue"
           :proxyIp="player.proxyIp"
           :userAgent="player.userAgent"
+          :isLooping="player.isLooping"
+          :loopCount="player.loopCount"
+          :currentLoop="player.currentLoop"
           @stop="stopPlayer"
-          @update:currentQueue="(val) => handleUpdateQueue(player, val)"
+          @update-state="(newState) => handleUpdateState(player, newState)"
         />
         <div v-if="players.length === 0" class="empty-state">
           <i class="pi pi-video empty-icon"></i>
@@ -123,6 +126,26 @@
           "
           @click="queueList.push('')"
         />
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center; border: 1px solid var(--p-surface-800); padding: 1rem; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+            <ToggleSwitch inputId="isLooping" v-model="isLooping" />
+            <label for="isLooping" style="font-weight: 600; cursor: pointer;">Enable Looping</label>
+          </div>
+          
+          <div v-if="isLooping" style="flex: 1;">
+            <FloatLabel variant="on">
+              <InputNumber 
+                id="loopCount" 
+                v-model="loopCount" 
+                style="width: 100%" 
+                :min="0" 
+                :max="1000"
+              />
+              <label for="loopCount">Loop Count (0 = Infinite)</label>
+            </FloatLabel>
+          </div>
+        </div>
       </div>
 
       <template #footer>
@@ -148,6 +171,8 @@ import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Skeleton from "primevue/skeleton";
 import Select from "primevue/select";
+import ToggleSwitch from "primevue/toggleswitch";
+import InputNumber from "primevue/inputnumber";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
 import { databases, ID, Query, DB_ID } from "../../lib/appwrite.js";
@@ -161,6 +186,8 @@ const queueList = ref([""]);
 const formError = ref("");
 const selectedProxyId = ref(null);
 const proxiesList = ref([]);
+const isLooping = ref(false);
+const loopCount = ref(0);
 const selectedUaType = ref("random");
 const uaOptions = ref([
 	{ label: "Random (Any)", value: "random" },
@@ -202,6 +229,9 @@ onMounted(async () => {
 					proxyId: doc.proxyId,
 					proxyIp: proxy ? proxy.ipAddress : null,
 					userAgent: doc.userAgent,
+					isLooping: doc.isLooping || false,
+					loopCount: doc.loopCount || 0,
+					currentLoop: doc.currentLoop || 0,
 				};
 			});
 		}
@@ -217,6 +247,8 @@ const resetForm = () => {
 	formError.value = "";
 	selectedProxyId.value = null;
 	selectedUaType.value = "random";
+	isLooping.value = false;
+	loopCount.value = 0;
 };
 
 const startPlayer = async () => {
@@ -291,6 +323,9 @@ const startPlayer = async () => {
 				currentQueue: 0,
 				proxyId: selectedProxyId.value || null,
 				userAgent: uaString,
+				isLooping: isLooping.value,
+				loopCount: loopCount.value || 0,
+				currentLoop: 0,
 			},
 		);
 
@@ -309,6 +344,9 @@ const startPlayer = async () => {
 			proxyId: doc.proxyId,
 			proxyIp: proxy ? proxy.ipAddress : null,
 			userAgent: doc.userAgent,
+			isLooping: doc.isLooping || false,
+			loopCount: doc.loopCount || 0,
+			currentLoop: doc.currentLoop || 0,
 		});
 
 		isModalVisible.value = false;
@@ -328,14 +366,18 @@ const stopPlayer = async (id) => {
 	}
 };
 
-const handleUpdateQueue = async (player, newQueue) => {
-	player.currentQueue = newQueue;
+const handleUpdateState = async (player, newState) => {
+	if (newState.currentQueue !== undefined) player.currentQueue = newState.currentQueue;
+	if (newState.currentLoop !== undefined) player.currentLoop = newState.currentLoop;
+	
 	try {
-		await databases.updateDocument(DB_ID, collectionId, player.id, {
-			currentQueue: newQueue,
-		});
+		const updatePayload = {};
+		if (newState.currentQueue !== undefined) updatePayload.currentQueue = newState.currentQueue;
+		if (newState.currentLoop !== undefined) updatePayload.currentLoop = newState.currentLoop;
+		
+		await databases.updateDocument(DB_ID, collectionId, player.id, updatePayload);
 	} catch (e) {
-		console.error("Failed to update queue", e);
+		console.error("Failed to update player state", e);
 	}
 };
 </script>

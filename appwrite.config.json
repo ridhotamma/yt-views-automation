@@ -227,6 +227,31 @@
 					"array": false,
 					"default": null,
 					"encrypt": false
+				},
+				{
+					"key": "isLooping",
+					"type": "boolean",
+					"required": false,
+					"array": false,
+					"default": false
+				},
+				{
+					"key": "loopCount",
+					"type": "integer",
+					"required": false,
+					"array": false,
+					"default": 0,
+					"min": 0,
+					"max": 100000
+				},
+				{
+					"key": "currentLoop",
+					"type": "integer",
+					"required": false,
+					"array": false,
+					"default": 0,
+					"min": 0,
+					"max": 100000
 				}
 			],
 			"indexes": []
