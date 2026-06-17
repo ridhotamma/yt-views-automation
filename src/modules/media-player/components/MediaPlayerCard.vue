@@ -100,9 +100,11 @@ const webviewRef = ref(null);
 const partitionName = computed(() => `persist:player-${props.id}`);
 
 watch(currentVideo, (newVideo) => {
-	if (newVideo && webviewRef.value) {
-		webviewRef.value.src = newVideo;
-	}
+	nextTick(() => {
+		if (newVideo && webviewRef.value) {
+			webviewRef.value.src = newVideo;
+		}
+	});
 });
 onMounted(async () => {
 	if (props.proxyIp && window.ipcRenderer) {
