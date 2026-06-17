@@ -295,6 +295,22 @@
 					"encrypt": false
 				},
 				{
+					"key": "paymentIframeMonthly",
+					"type": "text",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
+					"key": "paymentIframeAnnually",
+					"type": "text",
+					"required": false,
+					"array": false,
+					"default": null,
+					"encrypt": false
+				},
+				{
 					"key": "features",
 					"type": "text",
 					"required": false,
