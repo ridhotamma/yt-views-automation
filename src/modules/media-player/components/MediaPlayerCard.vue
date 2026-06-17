@@ -18,7 +18,7 @@
     <!-- Bottom Section: Controls -->
     <div class="controls-bar">
       <div style="display: flex; gap: 1rem; align-items: center;">
-        <div class="queue-info" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true">
+        <div class="queue-info" role="button" tabindex="0" v-tooltip.top="'View upcoming videos'" @click="isQueueModalVisible = true" @keydown.enter="isQueueModalVisible = true" @keydown.space.prevent="isQueueModalVisible = true">
           <i class="pi pi-list"></i>
           <span>Queue: {{ youtubeUrls.length - currentQueue }} left</span>
         </div>
@@ -26,7 +26,7 @@
           <i class="pi pi-desktop"></i>
           <span>Spoofed</span>
         </div>
-        <div v-if="youtubeUrls.length - currentQueue <= 0" class="queue-info" v-tooltip.top="'Restart Player'" @click="restartPlayer">
+        <div v-if="youtubeUrls.length - currentQueue <= 0" class="queue-info" role="button" tabindex="0" v-tooltip.top="'Restart Player'" @click="restartPlayer" @keydown.enter="restartPlayer" @keydown.space.prevent="restartPlayer">
           <i class="pi pi-refresh"></i>
           <span>Restart</span>
         </div>
@@ -131,10 +131,16 @@ const playNext = () => {
 		emit("update-state", { currentQueue: currentIndex.value });
 	} else {
 		// End of queue
-		if (props.isLooping && (props.loopCount === 0 || currentLoopIndex.value < props.loopCount)) {
+		if (
+			props.isLooping &&
+			(props.loopCount === 0 || currentLoopIndex.value < props.loopCount)
+		) {
 			currentIndex.value = 0;
 			currentLoopIndex.value++;
-			emit("update-state", { currentQueue: 0, currentLoop: currentLoopIndex.value });
+			emit("update-state", {
+				currentQueue: 0,
+				currentLoop: currentLoopIndex.value,
+			});
 		} else {
 			currentIndex.value++;
 			emit("update-state", { currentQueue: currentIndex.value });

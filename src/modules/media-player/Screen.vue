@@ -367,15 +367,24 @@ const stopPlayer = async (id) => {
 };
 
 const handleUpdateState = async (player, newState) => {
-	if (newState.currentQueue !== undefined) player.currentQueue = newState.currentQueue;
-	if (newState.currentLoop !== undefined) player.currentLoop = newState.currentLoop;
-	
+	if (newState.currentQueue !== undefined)
+		player.currentQueue = newState.currentQueue;
+	if (newState.currentLoop !== undefined)
+		player.currentLoop = newState.currentLoop;
+
 	try {
 		const updatePayload = {};
-		if (newState.currentQueue !== undefined) updatePayload.currentQueue = newState.currentQueue;
-		if (newState.currentLoop !== undefined) updatePayload.currentLoop = newState.currentLoop;
-		
-		await databases.updateDocument(DB_ID, collectionId, player.id, updatePayload);
+		if (newState.currentQueue !== undefined)
+			updatePayload.currentQueue = newState.currentQueue;
+		if (newState.currentLoop !== undefined)
+			updatePayload.currentLoop = newState.currentLoop;
+
+		await databases.updateDocument(
+			DB_ID,
+			collectionId,
+			player.id,
+			updatePayload,
+		);
 	} catch (e) {
 		console.error("Failed to update player state", e);
 	}

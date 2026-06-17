@@ -277,7 +277,7 @@ const currentPlanDetails = computed(() => {
 
 	const start = new Date(activeSubscription.value.startDate);
 	const end = new Date(activeSubscription.value.expiredDate);
-	
+
 	const formatDate = (date) => {
 		return new Intl.DateTimeFormat("en-US", {
 			year: "numeric",
