@@ -5,7 +5,13 @@ import electron from "vite-plugin-electron/simple";
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [
-		vue(),
+		vue({
+			template: {
+				compilerOptions: {
+					isCustomElement: (tag) => tag === 'webview'
+				}
+			}
+		}),
 		electron({
 			main: {
 				entry: "electron/main.js",

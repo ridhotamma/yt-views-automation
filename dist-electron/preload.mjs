@@ -1,19 +1,21 @@
-let e = require("electron");
-e.contextBridge.exposeInMainWorld(`ipcRenderer`, {
-	on(...t) {
-		let [n, r] = t;
-		return e.ipcRenderer.on(n, (e, ...t) => r(e, ...t));
+let electron = require("electron");
+//#region electron/preload.js
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+	on(...args) {
+		const [channel, listener] = args;
+		return electron.ipcRenderer.on(channel, (event, ...args) => listener(event, ...args));
 	},
-	off(...t) {
-		let [n, ...r] = t;
-		return e.ipcRenderer.off(n, ...r);
+	off(...args) {
+		const [channel, ...omit] = args;
+		return electron.ipcRenderer.off(channel, ...omit);
 	},
-	send(...t) {
-		let [n, ...r] = t;
-		return e.ipcRenderer.send(n, ...r);
+	send(...args) {
+		const [channel, ...omit] = args;
+		return electron.ipcRenderer.send(channel, ...omit);
 	},
-	invoke(...t) {
-		let [n, ...r] = t;
-		return e.ipcRenderer.invoke(n, ...r);
-	},
+	invoke(...args) {
+		const [channel, ...omit] = args;
+		return electron.ipcRenderer.invoke(channel, ...omit);
+	}
 });
+//#endregion
