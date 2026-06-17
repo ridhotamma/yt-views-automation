@@ -12,9 +12,9 @@
         </div>
       </template>
       <template v-else>
-        <MediaPlayerCard 
-          v-for="player in players" 
-          :key="player.id" 
+        <MediaPlayerCard
+          v-for="player in players"
+          :key="player.id"
           :id="player.id"
           :youtubeUrls="player.youtubeUrls"
           :currentQueue="player.currentQueue"
@@ -30,49 +30,109 @@
       </template>
     </div>
 
-    <Dialog v-model:visible="isModalVisible" modal header="Create New Media Player" :style="{ width: '500px' }" @hide="resetForm">
-      <div class="url-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
-        <div style="margin-bottom: 0.5rem; display: flex; gap: 1rem;">
-          <FloatLabel variant="on" style="flex: 1;">
-            <Select id="proxy-select" v-model="selectedProxyId" :options="proxiesList" optionLabel="name" optionValue="id" style="width: 100%" showClear />
+    <Dialog
+      v-model:visible="isModalVisible"
+      modal
+      header="Create New Media Player"
+      :style="{ width: '500px' }"
+      @hide="resetForm"
+    >
+      <div
+        class="url-inputs-container"
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-top: 0.5rem;
+        "
+      >
+        <div style="margin-bottom: 0.5rem; display: flex; gap: 1rem">
+          <FloatLabel variant="on" style="flex: 1">
+            <Select
+              id="proxy-select"
+              v-model="selectedProxyId"
+              :options="proxiesList"
+              optionLabel="name"
+              optionValue="id"
+              style="width: 100%"
+              showClear
+            />
             <label for="proxy-select">Proxy (Optional)</label>
           </FloatLabel>
-          <FloatLabel variant="on" style="flex: 1;">
-            <Select id="ua-select" v-model="selectedUaType" :options="uaOptions" optionLabel="label" optionValue="value" style="width: 100%" />
+          <FloatLabel variant="on" style="flex: 1">
+            <Select
+              id="ua-select"
+              v-model="selectedUaType"
+              :options="uaOptions"
+              optionLabel="label"
+              optionValue="value"
+              style="width: 100%"
+            />
             <label for="ua-select">Device / User Agent</label>
           </FloatLabel>
         </div>
 
-        <div v-for="(url, index) in queueList" :key="index" style="position: relative;">
+        <div
+          v-for="(url, index) in queueList"
+          :key="index"
+          style="position: relative"
+        >
           <FloatLabel variant="on">
-            <InputText :id="'url-' + index" v-model="queueList[index]" style="width: 100%" autocomplete="off" />
-            <label :for="'url-' + index">YouTube Video URL {{ index + 1 }}</label>
+            <InputText
+              :id="'url-' + index"
+              v-model="queueList[index]"
+              style="width: 100%"
+              autocomplete="off"
+            />
+            <label :for="'url-' + index"
+              >YouTube Video URL {{ index + 1 }}</label
+            >
           </FloatLabel>
-          <Button 
-            v-if="queueList.length > 1" 
-            icon="pi pi-times" 
-            severity="danger" 
-            text 
+          <Button
+            v-if="queueList.length > 1"
+            icon="pi pi-times"
+            severity="danger"
+            text
             rounded
-            style="position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%);" 
-            @click="queueList.splice(index, 1)" 
+            style="
+              position: absolute;
+              right: 0.25rem;
+              top: 50%;
+              transform: translateY(-50%);
+            "
+            @click="queueList.splice(index, 1)"
           />
         </div>
 
-        <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
+        <Message
+          v-if="formError"
+          severity="error"
+          size="small"
+          variant="simple"
+          >{{ formError }}</Message
+        >
 
-        <Button 
-          label="Add New URL" 
-          icon="pi pi-plus" 
-          outlined 
-          style="width: 100%; margin-top: 0.5rem;" 
-          :disabled="authStore.activePlan && queueList.length >= (authStore.activePlan.maxVideoPerQueue || 3)"
-          @click="queueList.push('')" 
+        <Button
+          label="Add New URL"
+          icon="pi pi-plus"
+          outlined
+          style="width: 100%; margin-top: 0.5rem"
+          :disabled="
+            authStore.activePlan &&
+            queueList.length >= (authStore.activePlan.maxVideoPerQueue || 3)
+          "
+          @click="queueList.push('')"
         />
       </div>
 
       <template #footer>
-        <Button label="Cancel" text severity="secondary" @click="isModalVisible = false" autofocus />
+        <Button
+          label="Cancel"
+          text
+          severity="secondary"
+          @click="isModalVisible = false"
+          autofocus
+        />
         <Button label="Create" @click="startPlayer" />
       </template>
     </Dialog>
@@ -177,8 +237,27 @@ const startPlayer = async () => {
 			return;
 		}
 
-		if (players.value.length >= maxMedia) {
-			formError.value = `You have reached the maximum limit of ${maxMedia} media players for your current plan. Please stop an existing player or upgrade your plan.`;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		try {
+			const logsRes = await databases.listDocuments(
+				DB_ID,
+				"media_creation_logs",
+				[
+					Query.equal("userId", currentUser.value.$id),
+					Query.greaterThanEqual("$createdAt", today.toISOString()),
+					Query.limit(1),
+				],
+			);
+
+			if (logsRes.total >= maxMedia) {
+				formError.value = `You have reached the maximum limit of ${maxMedia} media player creations per day for your current plan. Please try again tomorrow or upgrade your plan.`;
+				return;
+			}
+		} catch (err) {
+			console.error("Failed to check daily limits", err);
+			formError.value = "Failed to verify subscription limits. Please try again.";
 			return;
 		}
 	}
@@ -212,6 +291,11 @@ const startPlayer = async () => {
 				userAgent: uaString,
 			},
 		);
+
+		// Log the media creation
+		await databases.createDocument(DB_ID, "media_creation_logs", ID.unique(), {
+			userId: currentUser.value.$id,
+		});
 
 		const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
 

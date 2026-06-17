@@ -278,9 +278,7 @@
 					"type": "integer",
 					"required": false,
 					"array": false,
-					"default": 0,
-					"min": 0,
-					"max": 9999
+					"default": 0
 				},
 				{
 					"key": "proxyId",
@@ -344,18 +342,33 @@
 					"type": "integer",
 					"required": false,
 					"array": false,
-					"default": 5,
-					"min": 1,
-					"max": 9999
+					"default": 5
 				},
 				{
 					"key": "maxVideoPerQueue",
 					"type": "integer",
 					"required": false,
 					"array": false,
-					"default": 3,
-					"min": 1,
-					"max": 999
+					"default": 3
+				}
+			],
+			"indexes": []
+		},
+		{
+			"$id": "media_creation_logs",
+			"$permissions": ["create(\"users\")", "read(\"users\")"],
+			"databaseId": "6a31a1b80021df02203f",
+			"name": "media_creation_logs",
+			"enabled": true,
+			"rowSecurity": false,
+			"columns": [
+				{
+					"key": "userId",
+					"type": "text",
+					"required": true,
+					"array": false,
+					"default": null,
+					"encrypt": false
 				}
 			],
 			"indexes": []
