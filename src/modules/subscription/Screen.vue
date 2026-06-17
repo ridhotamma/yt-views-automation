@@ -194,7 +194,7 @@
         flexDirection: 'column',
       }"
     >
-      <webview
+      <iframe
         v-if="activePaymentUrl"
         :src="activePaymentUrl"
         style="
@@ -204,7 +204,8 @@
           border: none;
           background: #fff;
         "
-      ></webview>
+        allow="payment"
+      ></iframe>
     </Dialog>
 
     <!-- Toast for Notifications -->
@@ -415,14 +416,28 @@ const handleSubscribeClick = async (plan) => {
 	} else {
 		const paymentLink =
 			billingCycle.value === "monthly"
-				? plan.paymentLinkMonthly
-				: plan.paymentLinkAnnually;
+				? plan.paymentIframeMonthly || plan.paymentLinkMonthly
+				: plan.paymentIframeAnnually || plan.paymentLinkAnnually;
 		if (paymentLink) {
-			const url = new URL(paymentLink);
-			url.searchParams.set("name", currentUser.value.name);
-			url.searchParams.set("email", currentUser.value.email);
-			activePaymentUrl.value = url.toString();
-			isPaymentWebviewVisible.value = true;
+			try {
+				let finalLink = paymentLink;
+				if (!finalLink.startsWith('http://') && !finalLink.startsWith('https://')) {
+					finalLink = 'https://' + finalLink;
+				}
+				const url = new URL(finalLink);
+				url.searchParams.set("name", currentUser.value?.name || "User");
+				url.searchParams.set("email", currentUser.value?.email || "");
+				activePaymentUrl.value = url.toString();
+				isPaymentWebviewVisible.value = true;
+			} catch (err) {
+				console.error("Invalid payment link:", paymentLink, err);
+				toast.add({
+					severity: 'error',
+					summary: 'Error',
+					detail: 'Invalid payment link configuration',
+					life: 3000
+				});
+			}
 		} else {
 			isPaymentDialogVisible.value = true;
 		}

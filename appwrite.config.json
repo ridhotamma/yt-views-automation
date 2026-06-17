@@ -236,7 +236,7 @@
 		{
 			"$id": "subscription_plans",
 			"$permissions": [
-				"read(\"users\")"
+				"read(\"any\")"
 			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "subscription_plans",
