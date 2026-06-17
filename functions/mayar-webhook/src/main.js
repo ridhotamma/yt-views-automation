@@ -18,8 +18,9 @@ export default async ({ req, res, log, error }) => {
 			);
 		}
 
-		// Mayar sends "payment.success", "transaction.success", or "testing"
+		// Mayar sends "payment.received", "payment.success", "transaction.success", or "testing"
 		if (
+			body.event !== "payment.received" &&
 			body.event !== "payment.success" &&
 			body.event !== "transaction.success" &&
 			body.event !== "testing"

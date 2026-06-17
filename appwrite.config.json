@@ -258,6 +258,18 @@
 					"encrypt": false
 				},
 				{
+					"key": "planType",
+					"type": "string",
+					"format": "enum",
+					"elements": [
+						"free_plan",
+						"paid_plan"
+					],
+					"required": true,
+					"array": false,
+					"default": null
+				},
+				{
 					"key": "priceMonthly",
 					"type": "bigint",
 					"required": true,

@@ -213,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import Button from "primevue/button";
 import SelectButton from "primevue/selectbutton";
 import Dialog from "primevue/dialog";
@@ -223,7 +223,7 @@ import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
-import { databases, Query, ID, DB_ID } from "../../lib/appwrite.js";
+import { databases, Query, ID, DB_ID, client } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 
 const isLoading = ref(true);
@@ -249,6 +249,8 @@ const isSubscribing = ref(false);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 const toast = useToast();
+
+let realtimeUnsubscribe = null;
 
 onMounted(async () => {
 	isLoading.value = true;
@@ -276,11 +278,53 @@ onMounted(async () => {
 			if (subsRes.documents.length > 0) {
 				activeSubscription.value = subsRes.documents[0];
 			}
+
+			// Listen for realtime updates from the webhook
+			realtimeUnsubscribe = client.subscribe(
+				`databases.${DB_ID}.collections.user_subscriptions.documents`,
+				(response) => {
+					if (
+						response.payload.userId === currentUser.value.$id &&
+						response.payload.status === "active"
+					) {
+						// Payment successful, update state!
+						activeSubscription.value = response.payload;
+						const matchedPlan = plans.value.find(
+							(p) => p.$id === response.payload.planId,
+						);
+						if (matchedPlan) {
+							authStore.setSubscriptionStatus(true, matchedPlan);
+						}
+
+						// Close webview
+						isPaymentWebviewVisible.value = false;
+						activePaymentUrl.value = "";
+
+						toast.add({
+							severity: "success",
+							summary: "Payment Successful",
+							detail: "Your subscription has been activated!",
+							life: 5000,
+						});
+
+						// Refresh history
+						if (isHistoryVisible.value) {
+							openHistoryModal();
+						}
+					}
+				},
+			);
 		}
 	} catch (err) {
 		console.error("Failed to load subscription data", err);
 	} finally {
 		isLoading.value = false;
+	}
+});
+
+onUnmounted(() => {
+	if (realtimeUnsubscribe) {
+		realtimeUnsubscribe();
 	}
 });
 
