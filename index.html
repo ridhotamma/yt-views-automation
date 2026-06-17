@@ -5,6 +5,21 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>yt-views-automation</title>
+    <script>
+      (function() {
+        try {
+          var settings = localStorage.getItem('settings');
+          if (settings) {
+            var parsed = JSON.parse(settings);
+            if (parsed.theme === 'dark') {
+              document.documentElement.classList.add('app-dark');
+            }
+          } else {
+            document.documentElement.classList.add('app-dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
