@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { h } from "vue";
 const EmptyView = { render: () => h("div") };
 import ProxyScreen from "../modules/proxy/Screen.vue";
+import SubscriptionScreen from "../modules/subscription/Screen.vue";
 import LoginScreen from "../modules/auth/Screen.vue";
 import { account } from "../lib/appwrite";
 
@@ -24,6 +25,12 @@ const router = createRouter({
 			path: "/proxy",
 			name: "proxy",
 			component: ProxyScreen,
+			meta: { requiresAuth: true },
+		},
+		{
+			path: "/subscription",
+			name: "subscription",
+			component: SubscriptionScreen,
 			meta: { requiresAuth: true },
 		},
 	],

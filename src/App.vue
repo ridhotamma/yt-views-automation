@@ -25,6 +25,11 @@
           <i class="pi pi-list menu-icon"></i>
           <span v-if="!isCollapsed" class="menu-label">Proxy List</span>
         </router-link>
+        
+        <router-link to="/subscription" class="menu-item" v-tooltip.right="isCollapsed ? 'Subscriptions' : ''" active-class="active">
+          <i class="pi pi-credit-card menu-icon"></i>
+          <span v-if="!isCollapsed" class="menu-label">Subscriptions</span>
+        </router-link>
       </div>
 
       <div style="flex-grow: 1;"></div>
