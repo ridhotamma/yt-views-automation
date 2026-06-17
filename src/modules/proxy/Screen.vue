@@ -124,7 +124,6 @@ const formError = ref("");
 const isDeleteModalVisible = ref(false);
 const proxyToDelete = ref(null);
 
-
 const collectionId = "proxies";
 
 const fetchProxies = async () => {

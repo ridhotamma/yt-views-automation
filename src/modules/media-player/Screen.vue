@@ -61,7 +61,14 @@
 
         <Message v-if="formError" severity="error" size="small" variant="simple">{{ formError }}</Message>
 
-        <Button label="Add New URL" icon="pi pi-plus" outlined style="width: 100%; margin-top: 0.5rem;" @click="queueList.push('')" />
+        <Button 
+          label="Add New URL" 
+          icon="pi pi-plus" 
+          outlined 
+          style="width: 100%; margin-top: 0.5rem;" 
+          :disabled="authStore.activePlan && queueList.length >= (authStore.activePlan.maxVideoPerQueue || 3)"
+          @click="queueList.push('')" 
+        />
       </div>
 
       <template #footer>
@@ -104,7 +111,6 @@ const uaOptions = ref([
 ]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
-
 
 const collectionId = "media_players";
 
@@ -160,6 +166,21 @@ const startPlayer = async () => {
 	if (urls.length === 0) {
 		formError.value = "Please provide at least one URL.";
 		return;
+	}
+
+	if (authStore.activePlan) {
+		const maxVideo = authStore.activePlan.maxVideoPerQueue || 3;
+		const maxMedia = authStore.activePlan.maxMediaCreationPerDay || 5;
+
+		if (urls.length > maxVideo) {
+			formError.value = `Your current plan allows a maximum of ${maxVideo} videos per queue.`;
+			return;
+		}
+
+		if (players.value.length >= maxMedia) {
+			formError.value = `You have reached the maximum limit of ${maxMedia} media players for your current plan. Please stop an existing player or upgrade your plan.`;
+			return;
+		}
 	}
 
 	for (const url of urls) {

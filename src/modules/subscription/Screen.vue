@@ -39,10 +39,16 @@
         </ul>
 
         <div class="plan-footer">
-          <Button 
-            :label="activeSubscription?.planId === plan.$id ? 'Subscribed' : 'Subscribe Now'" 
+          <Button
+            :label="
+              activeSubscription?.planId === plan.$id
+                ? 'Subscribed'
+                : 'Subscribe Now'
+            "
             :disabled="activeSubscription?.planId === plan.$id"
-            :severity="activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'"
+            :severity="
+              activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'
+            "
             class="w-full"
             @click="handleSubscribeClick(plan)"
           />
@@ -106,25 +112,71 @@
     </Dialog>
 
     <!-- Subscription Confirmation Dialog -->
-    <Dialog v-model:visible="isConfirmVisible" modal header="Confirm Subscription" :style="{ width: '400px' }">
+    <Dialog
+      v-model:visible="isConfirmVisible"
+      modal
+      header="Confirm Subscription"
+      :style="{ width: '400px' }"
+    >
       <div v-if="selectedPlan">
-        <p>Are you sure you want to subscribe to the <strong>{{ selectedPlan.name }}</strong> plan?</p>
+        <p>
+          Are you sure you want to subscribe to the
+          <strong>{{ selectedPlan.name }}</strong> plan?
+        </p>
       </div>
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" text @click="isConfirmVisible = false" />
-        <Button label="Subscribe" icon="pi pi-check" severity="success" :loading="isSubscribing" @click="proceedSubscription" />
+        <Button
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          @click="isConfirmVisible = false"
+        />
+        <Button
+          label="Subscribe"
+          icon="pi pi-check"
+          severity="success"
+          :loading="isSubscribing"
+          @click="proceedSubscription"
+        />
       </template>
     </Dialog>
 
     <!-- Payment Coming Soon Dialog -->
-    <Dialog v-model:visible="isPaymentDialogVisible" modal header="Coming Soon" :style="{ width: '400px' }">
-      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem 0;">
-        <i class="pi pi-credit-card" style="font-size: 3rem; color: var(--p-primary-500); margin-bottom: 1rem;"></i>
+    <Dialog
+      v-model:visible="isPaymentDialogVisible"
+      modal
+      header="Coming Soon"
+      :style="{ width: '400px' }"
+    >
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 2rem 0;
+        "
+      >
+        <i
+          class="pi pi-credit-card"
+          style="
+            font-size: 3rem;
+            color: var(--p-primary-500);
+            margin-bottom: 1rem;
+          "
+        ></i>
         <p>Payment integration (Mayar.id) is currently under development.</p>
-        <p style="color: var(--p-surface-400); font-size: 0.9rem;">Please try a free plan or check back later!</p>
+        <p style="color: var(--p-surface-400); font-size: 0.9rem">
+          Please try a free plan or check back later!
+        </p>
       </div>
       <template #footer>
-        <Button label="Close" text @click="isPaymentDialogVisible = false" class="w-full" />
+        <Button
+          label="Close"
+          text
+          @click="isPaymentDialogVisible = false"
+          class="w-full"
+        />
       </template>
     </Dialog>
 
@@ -145,8 +197,6 @@ import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 import { databases, Query, ID, DB_ID } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
-
-
 
 const isLoading = ref(true);
 const plans = ref([]);
@@ -171,24 +221,22 @@ onMounted(async () => {
 		await authStore.initAuth();
 
 		if (currentUser.value) {
-			// Fetch subscription plans
-			const plansRes = await databases.listDocuments(
-				DB_ID,
-				"subscription_plans",
-			);
+			const plansRes = await databases.listDocuments({
+				databaseId: DB_ID,
+				collectionId: "subscription_plans",
+			});
 			plans.value = plansRes.documents;
 
-			// Fetch current user's active subscription
-			const subsRes = await databases.listDocuments(
-				DB_ID,
-				"user_subscriptions",
-				[
+			const subsRes = await databases.listDocuments({
+				databaseId: DB_ID,
+				collectionId: "user_subscriptions",
+				queries: [
 					Query.equal("userId", currentUser.value.$id),
 					Query.equal("status", "active"),
 					Query.orderDesc("$createdAt"),
 					Query.limit(1),
 				],
-			);
+			});
 
 			if (subsRes.documents.length > 0) {
 				activeSubscription.value = subsRes.documents[0];
@@ -303,9 +351,11 @@ const proceedSubscription = async () => {
 
 		// Create transaction record
 		await databases.createDocument(
-			DB_ID,
-			"user_subscription_transactions",
-			ID.unique(),
+			{
+				databaseId: DB_ID,
+				collectionId: "user_subscription_transactions",
+				documentId: ID.unique(),
+			},
 			{
 				userId: currentUser.value.$id,
 				planId: selectedPlan.value.$id,
@@ -315,9 +365,8 @@ const proceedSubscription = async () => {
 				referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
 			},
 		);
-
 		activeSubscription.value = subDoc;
-		authStore.setSubscriptionStatus(true);
+		authStore.setSubscriptionStatus(true, selectedPlan.value);
 
 		isConfirmVisible.value = false;
 		toast.add({

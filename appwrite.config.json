@@ -338,6 +338,24 @@
 					"array": true,
 					"default": null,
 					"encrypt": false
+				},
+				{
+					"key": "maxMediaCreationPerDay",
+					"type": "integer",
+					"required": false,
+					"array": false,
+					"default": 5,
+					"min": 1,
+					"max": 9999
+				},
+				{
+					"key": "maxVideoPerQueue",
+					"type": "integer",
+					"required": false,
+					"array": false,
+					"default": 3,
+					"min": 1,
+					"max": 999
 				}
 			],
 			"indexes": []
