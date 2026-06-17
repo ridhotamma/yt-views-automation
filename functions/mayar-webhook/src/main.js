@@ -6,9 +6,116 @@ export default async ({ req, res, log, error }) => {
 	}
 
 	try {
+		const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+		
+		const client = new Client()
+			.setEndpoint(
+				process.env.APPWRITE_FUNCTION_ENDPOINT ||
+					"https://sgp.cloud.appwrite.io/v1",
+			)
+			.setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+			.setKey(req.headers["x-appwrite-key"] || process.env.APPWRITE_API_KEY);
+
+		const databases = new Databases(client);
+		const databaseId = "6a31a1b80021df02203f";
+		const subCollectionId = "user_subscriptions";
+		const plansCollectionId = "subscription_plans";
+		const transCollectionId = "user_subscription_transactions";
+
+		// ==========================================
+		// ROUTE: Free Plan Subscription
+		// ==========================================
+		if (body && body.action === "subscribe_free_plan") {
+			const userId = req.headers["x-appwrite-user-id"];
+			if (!userId) {
+				error("Unauthorized access attempt. No user ID found.");
+				return res.json({ success: false, message: "Unauthorized" }, 401);
+			}
+
+			const { planId, billingCycle } = body;
+			if (!planId) {
+				return res.json({ success: false, message: "Missing planId" }, 400);
+			}
+
+			const planDoc = await databases.getDocument(
+				databaseId,
+				plansCollectionId,
+				planId,
+			);
+			
+			if (planDoc.planType !== "free_plan") {
+				return res.json(
+					{ success: false, message: "Cannot subscribe to paid plan via this endpoint" },
+					403,
+				);
+			}
+
+			const activeSubsResponse = await databases.listDocuments(
+				databaseId,
+				subCollectionId,
+				[Query.equal("userId", userId), Query.equal("status", "active")],
+			);
+
+			for (const sub of activeSubsResponse.documents) {
+				await databases.updateDocument(databaseId, subCollectionId, sub.$id, {
+					status: "inactive",
+				});
+				log(`Deactivated old subscription ${sub.$id} for user ${userId}`);
+			}
+
+			const now = new Date();
+			const expiredDate = new Date();
+			if (billingCycle === "monthly") {
+				expiredDate.setDate(now.getDate() + 30);
+			} else {
+				expiredDate.setFullYear(now.getFullYear() + 1);
+			}
+
+			const subDoc = await databases.createDocument(
+				databaseId,
+				subCollectionId,
+				ID.unique(),
+				{
+					userId: userId,
+					planId: planId,
+					status: "active",
+					startDate: now.toISOString(),
+					expiredDate: expiredDate.toISOString(),
+				},
+			);
+
+			await databases.createDocument(
+				databaseId,
+				transCollectionId,
+				ID.unique(),
+				{
+					userId: userId,
+					planId: planId,
+					amount: planDoc.priceMonthly,
+					status: "success",
+					transactionDate: now.toISOString(),
+					referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
+				},
+			);
+
+			log(`Created free subscription ${subDoc.$id} for user ${userId}`);
+			return res.json({ success: true, subscription: subDoc });
+		}
+
+		// ==========================================
+		// ROUTE: Mayar Webhook
+		// ==========================================
 		log("Received Mayar Webhook");
 
-		const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+		const expectedToken = process.env.MAYAR_WEBHOOK_TOKEN;
+		if (expectedToken) {
+			const authHeader = req.headers["authorization"] || "";
+			if (authHeader !== `Bearer ${expectedToken}`) {
+				error("Unauthorized webhook attempt. Invalid token.");
+				return res.json({ success: false, message: "Unauthorized" }, 401);
+			}
+		}
+
 		log("Request Body: " + JSON.stringify(body, null, 2));
 
 		if (!body || !body.event) {
@@ -45,21 +152,7 @@ export default async ({ req, res, log, error }) => {
 			return res.json({ success: true, message: "Transaction not successful" });
 		}
 
-		const client = new Client()
-			.setEndpoint(
-				process.env.APPWRITE_FUNCTION_ENDPOINT ||
-					"https://sgp.cloud.appwrite.io/v1",
-			)
-			.setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-			.setKey(req.headers["x-appwrite-key"] || process.env.APPWRITE_API_KEY);
-
-		const databases = new Databases(client);
 		const usersAPI = new Users(client);
-
-		const databaseId = "6a31a1b80021df02203f";
-		const transCollectionId = "user_subscription_transactions";
-		const subCollectionId = "user_subscriptions";
-		const plansCollectionId = "subscription_plans";
 
 		// 1. Find User by Email
 		const customerEmail = data.customerEmail;

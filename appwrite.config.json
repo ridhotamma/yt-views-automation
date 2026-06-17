@@ -126,10 +126,7 @@
 		{
 			"$id": "user_subscriptions",
 			"$permissions": [
-				"create(\"users\")",
-				"read(\"users\")",
-				"update(\"users\")",
-				"delete(\"users\")"
+				"read(\"users\")"
 			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscriptions",
@@ -239,10 +236,7 @@
 		{
 			"$id": "subscription_plans",
 			"$permissions": [
-				"create(\"users\")",
-				"read(\"users\")",
-				"update(\"users\")",
-				"delete(\"users\")"
+				"read(\"users\")"
 			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "subscription_plans",
@@ -332,10 +326,7 @@
 		{
 			"$id": "user_subscription_transactions",
 			"$permissions": [
-				"create(\"users\")",
-				"read(\"users\")",
-				"update(\"users\")",
-				"delete(\"users\")"
+				"read(\"users\")"
 			],
 			"databaseId": "6a31a1b80021df02203f",
 			"name": "user_subscription_transactions",

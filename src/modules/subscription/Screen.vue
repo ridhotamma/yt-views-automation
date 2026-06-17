@@ -223,7 +223,7 @@ import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
-import { databases, Query, ID, DB_ID, client } from "../../lib/appwrite.js";
+import { databases, functions, Query, ID, DB_ID, client } from "../../lib/appwrite.js";
 import { useAuthStore } from "../../store/auth.js";
 
 const isLoading = ref(true);
@@ -435,63 +435,21 @@ const proceedSubscription = async () => {
 	isSubscribing.value = true;
 
 	try {
-		const now = new Date();
-		const expiredDate = new Date();
+		const response = await functions.createExecution(
+			"6a31b59f00148f93b6bb", // mayar_webhook
+			JSON.stringify({
+				action: "subscribe_free_plan",
+				planId: selectedPlan.value.$id,
+				billingCycle: billingCycle.value
+			})
+		);
 
-		// Set duration based on billing cycle
-		if (billingCycle.value === "monthly") {
-			expiredDate.setDate(now.getDate() + 30);
-		} else {
-			expiredDate.setFullYear(now.getFullYear() + 1);
+		const result = JSON.parse(response.responseBody);
+		if (!result.success) {
+			throw new Error(result.message || "Failed to process subscription");
 		}
 
-		// Deactivate existing active subscriptions
-		const activeSubsResponse = await databases.listDocuments(
-			DB_ID,
-			"user_subscriptions",
-			[
-				Query.equal("userId", currentUser.value.$id),
-				Query.equal("status", "active"),
-			],
-		);
-
-		for (const sub of activeSubsResponse.documents) {
-			await databases.updateDocument(DB_ID, "user_subscriptions", sub.$id, {
-				status: "inactive",
-			});
-		}
-
-		// Create active subscription
-		const subDoc = await databases.createDocument(
-			DB_ID,
-			"user_subscriptions",
-			ID.unique(),
-			{
-				userId: currentUser.value.$id,
-				planId: selectedPlan.value.$id,
-				status: "active",
-				startDate: now.toISOString(),
-				expiredDate: expiredDate.toISOString(),
-			},
-		);
-
-		// Create transaction record
-		await databases.createDocument(
-			DB_ID,
-			"user_subscription_transactions",
-			ID.unique(),
-			{
-				userId: currentUser.value.$id,
-				planId: selectedPlan.value.$id,
-				amount:
-					billingCycle.value === "monthly"
-						? selectedPlan.value.priceMonthly
-						: selectedPlan.value.priceAnnually,
-				status: "success",
-				transactionDate: now.toISOString(),
-				referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
-			},
-		);
+		const subDoc = result.subscription;
 		activeSubscription.value = subDoc;
 		authStore.setSubscriptionStatus(true, selectedPlan.value);
 

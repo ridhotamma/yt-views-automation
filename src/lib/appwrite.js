@@ -1,4 +1,4 @@
-import { Client, Account, Databases, ID, Query } from "appwrite";
+import { Client, Account, Databases, Functions, ID, Query } from "appwrite";
 
 const client = new Client()
 	.setEndpoint(
@@ -8,6 +8,7 @@ const client = new Client()
 
 export const account = new Account(client);
 export const databases = new Databases(client);
+export const functions = new Functions(client);
 
 export const DB_ID = "6a31a1b80021df02203f";
 
