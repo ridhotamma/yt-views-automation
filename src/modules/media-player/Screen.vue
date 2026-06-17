@@ -40,16 +40,13 @@
       :style="{ width: '500px' }"
       @hide="resetForm"
     >
-      <div
-        class="url-inputs-container"
-        style="
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-top: 0.5rem;
-        "
+      <Form
+        id="playerForm"
+        :resolver="resolver"
+        @submit="onFormSubmit"
+        style="display: flex; flex-direction: column; gap: 1rem"
       >
-        <div style="margin-bottom: 0.5rem; display: flex; gap: 1rem">
+        <div style="margin: 0.5rem 0rem; display: flex; gap: 1rem">
           <FloatLabel variant="on" style="flex: 1">
             <Select
               id="proxy-select"
@@ -76,21 +73,63 @@
         </div>
 
         <div
+          style="
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1">
+            <ToggleSwitch inputId="isLooping" v-model="isLooping" />
+            <label for="isLooping" style="font-weight: 600; cursor: pointer"
+              >Enable Looping</label
+            >
+          </div>
+
+          <div style="flex: 1">
+            <FloatLabel variant="on">
+              <InputNumber
+                id="loopCount"
+                v-model="loopCount"
+                style="width: 100%"
+                :min="0"
+                :max="1000"
+                :disabled="!isLooping"
+              />
+              <label for="loopCount">Loop Count (0 = Infinite)</label>
+            </FloatLabel>
+          </div>
+        </div>
+
+        <Divider style="margin: 0.5rem 0;" />
+
+        <div
           v-for="(url, index) in queueList"
           :key="index"
           style="position: relative"
         >
-          <FloatLabel variant="on">
-            <InputText
-              :id="'url-' + index"
-              v-model="queueList[index]"
-              style="width: 100%"
-              autocomplete="off"
-            />
-            <label :for="'url-' + index"
-              >YouTube Video URL {{ index + 1 }}</label
-            >
-          </FloatLabel>
+          <FormField :name="'url_' + index" v-slot="$field">
+            <FloatLabel variant="on">
+              <InputText
+                :id="'url-' + index"
+                :name="'url_' + index"
+                v-model="queueList[index]"
+                style="width: 100%"
+                autocomplete="off"
+                :invalid="$field?.invalid"
+              />
+              <label :for="'url-' + index"
+                >YouTube Video URL {{ index + 1 }}</label
+              >
+            </FloatLabel>
+            <Message
+              v-if="$field?.invalid"
+              severity="error"
+              size="small"
+              variant="simple"
+              style="margin-top: 0.25rem"
+            >{{ $field.error?.message }}</Message>
+          </FormField>
           <Button
             v-if="queueList.length > 1"
             icon="pi pi-times"
@@ -126,27 +165,7 @@
           "
           @click="queueList.push('')"
         />
-
-        <div style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center; border: 1px solid var(--p-surface-800); padding: 1rem; border-radius: 8px;">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
-            <ToggleSwitch inputId="isLooping" v-model="isLooping" />
-            <label for="isLooping" style="font-weight: 600; cursor: pointer;">Enable Looping</label>
-          </div>
-          
-          <div v-if="isLooping" style="flex: 1;">
-            <FloatLabel variant="on">
-              <InputNumber 
-                id="loopCount" 
-                v-model="loopCount" 
-                style="width: 100%" 
-                :min="0" 
-                :max="1000"
-              />
-              <label for="loopCount">Loop Count (0 = Infinite)</label>
-            </FloatLabel>
-          </div>
-        </div>
-      </div>
+      </Form>
 
       <template #footer>
         <Button
@@ -156,7 +175,7 @@
           @click="isModalVisible = false"
           autofocus
         />
-        <Button label="Create" @click="startPlayer" />
+        <Button label="Create" type="submit" form="playerForm" />
       </template>
     </Dialog>
   </div>
@@ -173,6 +192,8 @@ import Skeleton from "primevue/skeleton";
 import Select from "primevue/select";
 import ToggleSwitch from "primevue/toggleswitch";
 import InputNumber from "primevue/inputnumber";
+import Divider from "primevue/divider";
+import { Form, FormField } from "@primevue/forms";
 import MediaPlayerCard from "./components/MediaPlayerCard.vue";
 import { ytRegex } from "../../constants/validator.js";
 import { databases, ID, Query, DB_ID } from "../../lib/appwrite.js";
@@ -190,11 +211,11 @@ const isLooping = ref(false);
 const loopCount = ref(0);
 const selectedUaType = ref("random");
 const uaOptions = ref([
-	{ label: "Random (Any)", value: "random" },
-	{ label: "Windows Desktop", value: "windows" },
-	{ label: "macOS Desktop", value: "macos" },
-	{ label: "iPhone Mobile", value: "iphone" },
-	{ label: "Android Mobile", value: "android" },
+  { label: "Random (Any)", value: "random" },
+  { label: "Windows Desktop", value: "windows" },
+  { label: "macOS Desktop", value: "macos" },
+  { label: "iPhone Mobile", value: "iphone" },
+  { label: "Android Mobile", value: "android" },
 ]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
@@ -202,192 +223,202 @@ const currentUser = computed(() => authStore.user);
 const collectionId = "media_players";
 
 onMounted(async () => {
-	isLoading.value = true;
-	try {
-		await authStore.initAuth();
+  isLoading.value = true;
+  try {
+    await authStore.initAuth();
 
-		if (currentUser.value) {
-			const proxyRes = await databases.listDocuments(DB_ID, "proxies");
-			proxiesList.value = proxyRes.documents.map((doc) => ({
-				id: doc.$id,
-				name: doc.name,
-				ipAddress: doc.ipAddress,
-			}));
+    if (currentUser.value) {
+      const proxyRes = await databases.listDocuments(DB_ID, "proxies");
+      proxiesList.value = proxyRes.documents.map((doc) => ({
+        id: doc.$id,
+        name: doc.name,
+        ipAddress: doc.ipAddress,
+      }));
 
-			const res = await databases.listDocuments(DB_ID, collectionId, [
-				Query.equal("userId", currentUser.value.$id),
-				Query.orderDesc("$createdAt"),
-			]);
+      const res = await databases.listDocuments(DB_ID, collectionId, [
+        Query.equal("userId", currentUser.value.$id),
+        Query.orderDesc("$createdAt"),
+      ]);
 
-			players.value = res.documents.map((doc) => {
-				const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
-				return {
-					id: doc.$id,
-					youtubeUrls: doc.youtubeUrls,
-					currentQueue: doc.currentQueue,
-					userId: doc.userId,
-					proxyId: doc.proxyId,
-					proxyIp: proxy ? proxy.ipAddress : null,
-					userAgent: doc.userAgent,
-					isLooping: doc.isLooping || false,
-					loopCount: doc.loopCount || 0,
-					currentLoop: doc.currentLoop || 0,
-				};
-			});
-		}
-	} catch (e) {
-		console.error("Failed to fetch players", e);
-	} finally {
-		isLoading.value = false;
-	}
+      players.value = res.documents.map((doc) => {
+        const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+        return {
+          id: doc.$id,
+          youtubeUrls: doc.youtubeUrls,
+          currentQueue: doc.currentQueue,
+          userId: doc.userId,
+          proxyId: doc.proxyId,
+          proxyIp: proxy ? proxy.ipAddress : null,
+          userAgent: doc.userAgent,
+          isLooping: doc.isLooping || false,
+          loopCount: doc.loopCount || 0,
+          currentLoop: doc.currentLoop || 0,
+        };
+      });
+    }
+  } catch (e) {
+    console.error("Failed to fetch players", e);
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 const resetForm = () => {
-	queueList.value = [""];
-	formError.value = "";
-	selectedProxyId.value = null;
-	selectedUaType.value = "random";
-	isLooping.value = false;
-	loopCount.value = 0;
+  queueList.value = [""];
+  formError.value = "";
+  selectedProxyId.value = null;
+  selectedUaType.value = "random";
+  isLooping.value = false;
+  loopCount.value = 0;
 };
 
-const startPlayer = async () => {
-	formError.value = "";
+const resolver = ({ values }) => {
+  const errors = {};
+  let hasUrl = false;
 
-	const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
+  queueList.value.forEach((_, index) => {
+    const val = values[`url_${index}`];
+    if (val && val.trim()) {
+      hasUrl = true;
+      if (!ytRegex.test(val.trim())) {
+        errors[`url_${index}`] = [{ message: "Invalid YouTube URL." }];
+      }
+    }
+  });
 
-	if (urls.length === 0) {
-		formError.value = "Please provide at least one URL.";
-		return;
-	}
+  if (!hasUrl) {
+    errors["url_0"] = [{ message: "Please provide at least one valid URL." }];
+  }
 
-	if (authStore.activePlan) {
-		const maxVideo = authStore.activePlan.maxVideoPerQueue || 3;
-		const maxMedia = authStore.activePlan.maxMediaCreationPerDay || 5;
+  return { errors };
+};
 
-		if (urls.length > maxVideo) {
-			formError.value = `Your current plan allows a maximum of ${maxVideo} videos per queue.`;
-			return;
-		}
+const onFormSubmit = async ({ valid }) => {
+  if (!valid) return;
+  formError.value = "";
 
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
+  const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
 
-		try {
-			const logsRes = await databases.listDocuments(
-				DB_ID,
-				"media_creation_logs",
-				[
-					Query.equal("userId", currentUser.value.$id),
-					Query.greaterThanEqual("$createdAt", today.toISOString()),
-					Query.limit(1),
-				],
-			);
+  if (authStore.activePlan) {
+    const maxVideo = authStore.activePlan.maxVideoPerQueue || 3;
+    const maxMedia = authStore.activePlan.maxMediaCreationPerDay || 5;
 
-			if (logsRes.total >= maxMedia) {
-				formError.value = `You have reached the maximum limit of ${maxMedia} media player creations per day for your current plan. Please try again tomorrow or upgrade your plan.`;
-				return;
-			}
-		} catch (err) {
-			console.error("Failed to check daily limits", err);
-			formError.value =
-				"Failed to verify subscription limits. Please try again.";
-			return;
-		}
-	}
+    if (urls.length > maxVideo) {
+      formError.value = `Your current plan allows a maximum of ${maxVideo} videos per queue.`;
+      return;
+    }
 
-	for (const url of urls) {
-		if (!ytRegex.test(url)) {
-			formError.value = "Invalid YouTube URL: " + url;
-			return;
-		}
-	}
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-	if (!currentUser.value) {
-		formError.value = "You must be logged in to create a player.";
-		return;
-	}
+    try {
+      const logsRes = await databases.listDocuments(
+        DB_ID,
+        "media_creation_logs",
+        [
+          Query.equal("userId", currentUser.value.$id),
+          Query.greaterThanEqual("$createdAt", today.toISOString()),
+          Query.limit(1),
+        ],
+      );
 
-	try {
-		const uaType =
-			selectedUaType.value === "random" ? null : selectedUaType.value;
-		const uaString = generateUserAgent(uaType);
+      if (logsRes.total >= maxMedia) {
+        formError.value = `You have reached the maximum limit of ${maxMedia} media player creations per day for your current plan. Please try again tomorrow or upgrade your plan.`;
+        return;
+      }
+    } catch (err) {
+      console.error("Failed to check daily limits", err);
+      formError.value =
+        "Failed to verify subscription limits. Please try again.";
+      return;
+    }
+  }
 
-		const doc = await databases.createDocument(
-			DB_ID,
-			collectionId,
-			ID.unique(),
-			{
-				youtubeUrls: urls,
-				userId: currentUser.value.$id,
-				currentQueue: 0,
-				proxyId: selectedProxyId.value || null,
-				userAgent: uaString,
-				isLooping: isLooping.value,
-				loopCount: loopCount.value || 0,
-				currentLoop: 0,
-			},
-		);
+  if (!currentUser.value) {
+    formError.value = "You must be logged in to create a player.";
+    return;
+  }
 
-		// Log the media creation
-		await databases.createDocument(DB_ID, "media_creation_logs", ID.unique(), {
-			userId: currentUser.value.$id,
-		});
+  try {
+    const uaType =
+      selectedUaType.value === "random" ? null : selectedUaType.value;
+    const uaString = generateUserAgent(uaType);
 
-		const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+    const doc = await databases.createDocument(
+      DB_ID,
+      collectionId,
+      ID.unique(),
+      {
+        youtubeUrls: urls,
+        userId: currentUser.value.$id,
+        currentQueue: 0,
+        proxyId: selectedProxyId.value || null,
+        userAgent: uaString,
+        isLooping: isLooping.value,
+        loopCount: loopCount.value || 0,
+        currentLoop: 0,
+      },
+    );
 
-		players.value.unshift({
-			id: doc.$id,
-			youtubeUrls: doc.youtubeUrls,
-			userId: doc.userId,
-			currentQueue: doc.currentQueue,
-			proxyId: doc.proxyId,
-			proxyIp: proxy ? proxy.ipAddress : null,
-			userAgent: doc.userAgent,
-			isLooping: doc.isLooping || false,
-			loopCount: doc.loopCount || 0,
-			currentLoop: doc.currentLoop || 0,
-		});
+    // Log the media creation
+    await databases.createDocument(DB_ID, "media_creation_logs", ID.unique(), {
+      userId: currentUser.value.$id,
+    });
 
-		isModalVisible.value = false;
-		resetForm();
-	} catch (e) {
-		console.error(e);
-		formError.value = "Failed to save player. " + e.message;
-	}
+    const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+
+    players.value.unshift({
+      id: doc.$id,
+      youtubeUrls: doc.youtubeUrls,
+      userId: doc.userId,
+      currentQueue: doc.currentQueue,
+      proxyId: doc.proxyId,
+      proxyIp: proxy ? proxy.ipAddress : null,
+      userAgent: doc.userAgent,
+      isLooping: doc.isLooping || false,
+      loopCount: doc.loopCount || 0,
+      currentLoop: doc.currentLoop || 0,
+    });
+
+    isModalVisible.value = false;
+    resetForm();
+  } catch (e) {
+    console.error(e);
+    formError.value = "Failed to save player. " + e.message;
+  }
 };
 
 const stopPlayer = async (id) => {
-	try {
-		await databases.deleteDocument(DB_ID, collectionId, id);
-		players.value = players.value.filter((p) => p.id !== id);
-	} catch (e) {
-		console.error("Failed to delete player", e);
-	}
+  try {
+    await databases.deleteDocument(DB_ID, collectionId, id);
+    players.value = players.value.filter((p) => p.id !== id);
+  } catch (e) {
+    console.error("Failed to delete player", e);
+  }
 };
 
 const handleUpdateState = async (player, newState) => {
-	if (newState.currentQueue !== undefined)
-		player.currentQueue = newState.currentQueue;
-	if (newState.currentLoop !== undefined)
-		player.currentLoop = newState.currentLoop;
+  if (newState.currentQueue !== undefined)
+    player.currentQueue = newState.currentQueue;
+  if (newState.currentLoop !== undefined)
+    player.currentLoop = newState.currentLoop;
 
-	try {
-		const updatePayload = {};
-		if (newState.currentQueue !== undefined)
-			updatePayload.currentQueue = newState.currentQueue;
-		if (newState.currentLoop !== undefined)
-			updatePayload.currentLoop = newState.currentLoop;
+  try {
+    const updatePayload = {};
+    if (newState.currentQueue !== undefined)
+      updatePayload.currentQueue = newState.currentQueue;
+    if (newState.currentLoop !== undefined)
+      updatePayload.currentLoop = newState.currentLoop;
 
-		await databases.updateDocument(
-			DB_ID,
-			collectionId,
-			player.id,
-			updatePayload,
-		);
-	} catch (e) {
-		console.error("Failed to update player state", e);
-	}
+    await databases.updateDocument(
+      DB_ID,
+      collectionId,
+      player.id,
+      updatePayload,
+    );
+  } catch (e) {
+    console.error("Failed to update player state", e);
+  }
 };
 </script>
 
