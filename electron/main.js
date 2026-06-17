@@ -2,8 +2,7 @@ import { app, BrowserWindow, ipcMain, screen, session } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
+const currentDir = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -15,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // │
 // ... (rest remains unchanged)
 
-process.env.DIST = join(__dirname, "../dist");
+process.env.DIST = join(currentDir, "../dist");
 process.env.VITE_PUBLIC = app.isPackaged
 	? process.env.DIST
 	: join(process.env.DIST, "../public");
@@ -84,7 +83,7 @@ function createWindow() {
 		minHeight: 600,
 		icon: iconPath,
 		webPreferences: {
-			preload: join(__dirname, "preload.mjs"),
+			preload: join(currentDir, "preload.js"),
 			webviewTag: true,
 		},
 	});
