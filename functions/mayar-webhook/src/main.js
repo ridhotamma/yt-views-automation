@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID } from "node-appwrite";
+import { Client, Databases, Query, ID, Users } from "node-appwrite";
 
 export default async ({ req, res, log, error }) => {
 	if (req.method !== "POST") {
@@ -8,47 +8,35 @@ export default async ({ req, res, log, error }) => {
 	try {
 		log("Received Mayar Webhook");
 
-		const body = req.body;
-		log(
-			"Request Body: " +
-				(typeof body === "object" ? JSON.stringify(body, null, 2) : body),
-		);
+		const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+		log("Request Body: " + JSON.stringify(body, null, 2));
 
-		if (!body || !body.type) {
+		if (!body || !body.event) {
 			return res.json(
 				{ success: false, message: "Invalid payload structure" },
 				400,
 			);
 		}
 
-		if (body.type !== "payment.received") {
-			log(`Ignoring event type: ${body.type}`);
+		// Mayar sends "payment.success", "transaction.success", or "testing"
+		if (
+			body.event !== "payment.success" &&
+			body.event !== "transaction.success" &&
+			body.event !== "testing"
+		) {
+			log(`Ignoring event: ${body.event}`);
 			return res.json({ success: true, message: "Event ignored" });
 		}
 
-		let mayarPayload;
-		try {
-			mayarPayload =
-				typeof body.payload === "string"
-					? JSON.parse(body.payload)
-					: body.payload;
-		} catch (e) {
-			error("Failed to parse inner payload");
-			return res.json(
-				{ success: false, message: "Failed to parse inner payload" },
-				400,
-			);
-		}
-
-		const data = mayarPayload.data;
-		if (!data || !data.transactionId) {
+		const data = body.data;
+		if (!data || !data.id) {
 			return res.json(
 				{ success: false, message: "Missing transaction data" },
 				400,
 			);
 		}
 
-		const transactionId = data.transactionId;
+		const transactionId = data.id;
 		const status = data.status;
 
 		if (status !== "SUCCESS") {
@@ -65,40 +53,94 @@ export default async ({ req, res, log, error }) => {
 			.setKey(req.headers["x-appwrite-key"] || process.env.APPWRITE_API_KEY);
 
 		const databases = new Databases(client);
+		const usersAPI = new Users(client);
+
 		const databaseId = "6a31a1b80021df02203f";
 		const transCollectionId = "user_subscription_transactions";
 		const subCollectionId = "user_subscriptions";
+		const plansCollectionId = "subscription_plans";
 
-		log(`Looking up transaction with referenceId: ${transactionId}`);
-		const transResponse = await databases.listDocuments(
-			databaseId,
-			transCollectionId,
-			[Query.equal("referenceId", transactionId), Query.limit(1)],
+		// 1. Find User by Email
+		const customerEmail = data.customerEmail;
+		if (!customerEmail) {
+			return res.json(
+				{ success: false, message: "No customer email provided" },
+				400,
+			);
+		}
+
+		log(`Looking up user with email: ${customerEmail}`);
+		const userList = await usersAPI.list([Query.equal("email", customerEmail)]);
+		if (userList.users.length === 0) {
+			log(`User with email ${customerEmail} not found in Appwrite.`);
+			return res.json({ success: false, message: "User not found" }, 404);
+		}
+		const user = userList.users[0];
+		const userId = user.$id;
+
+		// 2. Determine Plan based on amount
+		const amount = data.amount;
+		log(
+			`Looking up plan with priceMonthly or priceAnnually equal to: ${amount}`,
 		);
 
-		if (transResponse.documents.length === 0) {
-			log(`Transaction ${transactionId} not found in database.`);
+		const plansList = await databases.listDocuments(
+			databaseId,
+			plansCollectionId,
+		);
+		let matchedPlan = null;
+		let billingCycle = "monthly"; // "monthly" or "annually"
+
+		for (const plan of plansList.documents) {
+			if (plan.priceMonthly === amount) {
+				matchedPlan = plan;
+				billingCycle = "monthly";
+				break;
+			}
+			if (plan.priceAnnually === amount) {
+				matchedPlan = plan;
+				billingCycle = "annually";
+				break;
+			}
+		}
+
+		if (!matchedPlan) {
+			log(`No subscription plan found for amount: ${amount}`);
 			return res.json(
-				{ success: false, message: "Transaction not found" },
+				{ success: false, message: "Plan not found for the given amount" },
 				404,
 			);
 		}
 
-		const transaction = transResponse.documents[0];
+		const planId = matchedPlan.$id;
 
-		await databases.updateDocument(
+		// 3. Check if transaction already exists
+		const transResponse = await databases.listDocuments(
 			databaseId,
 			transCollectionId,
-			transaction.$id,
-			{
-				status: "success",
-			},
+			[Query.equal("referenceId", transactionId.toString()), Query.limit(1)],
 		);
-		log(`Updated transaction ${transaction.$id} to success`);
 
-		const userId = transaction.userId;
-		const planId = transaction.planId;
+		if (transResponse.documents.length > 0) {
+			log(`Transaction ${transactionId} already processed.`);
+			return res.json({
+				success: true,
+				message: "Transaction already processed",
+			});
+		}
 
+		// 4. Create Transaction Record
+		await databases.createDocument(databaseId, transCollectionId, ID.unique(), {
+			userId: userId,
+			planId: planId,
+			amount: amount,
+			status: "success",
+			transactionDate: new Date().toISOString(),
+			referenceId: transactionId.toString(),
+		});
+		log(`Created transaction record for ${transactionId}`);
+
+		// 5. Update or Create Subscription
 		const subResponse = await databases.listDocuments(
 			databaseId,
 			subCollectionId,
@@ -110,20 +152,18 @@ export default async ({ req, res, log, error }) => {
 		);
 
 		const now = new Date();
-		const thirtyDaysFromNow = new Date(
-			now.getTime() + 30 * 24 * 60 * 60 * 1000,
-		);
+		let durationDays = billingCycle === "monthly" ? 30 : 365;
+		const addedTime = durationDays * 24 * 60 * 60 * 1000;
+		const futureDate = new Date(now.getTime() + addedTime);
 
 		if (subResponse.documents.length > 0) {
 			const subscription = subResponse.documents[0];
 
-			let newExpiry = thirtyDaysFromNow;
+			let newExpiry = futureDate;
 			if (subscription.status === "active" && subscription.expiredDate) {
 				const currentExpiry = new Date(subscription.expiredDate);
 				if (currentExpiry > now) {
-					newExpiry = new Date(
-						currentExpiry.getTime() + 30 * 24 * 60 * 60 * 1000,
-					);
+					newExpiry = new Date(currentExpiry.getTime() + addedTime);
 				}
 			}
 
@@ -143,7 +183,7 @@ export default async ({ req, res, log, error }) => {
 				planId: planId,
 				status: "active",
 				startDate: now.toISOString(),
-				expiredDate: thirtyDaysFromNow.toISOString(),
+				expiredDate: futureDate.toISOString(),
 			});
 			log(`Created new subscription for user ${userId}`);
 		}

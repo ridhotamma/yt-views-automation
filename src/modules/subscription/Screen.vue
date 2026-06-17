@@ -52,6 +52,7 @@
                 : 'Subscribe Now'
             "
             :disabled="activeSubscription?.planId === plan.$id"
+            :loading="isSubscribing && selectedPlan?.$id === plan.$id"
             :severity="
               activeSubscription?.planId === plan.$id ? 'secondary' : 'primary'
             "
@@ -117,35 +118,7 @@
       </div>
     </Dialog>
 
-    <!-- Subscription Confirmation Dialog -->
-    <Dialog
-      v-model:visible="isConfirmVisible"
-      modal
-      header="Confirm Subscription"
-      :style="{ width: '400px' }"
-    >
-      <div v-if="selectedPlan">
-        <p>
-          Are you sure you want to subscribe to the
-          <strong>{{ selectedPlan.name }}</strong> plan?
-        </p>
-      </div>
-      <template #footer>
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          text
-          @click="isConfirmVisible = false"
-        />
-        <Button
-          label="Subscribe"
-          icon="pi pi-check"
-          severity="success"
-          :loading="isSubscribing"
-          @click="proceedSubscription"
-        />
-      </template>
-    </Dialog>
+
 
     <!-- Payment Coming Soon Dialog -->
     <Dialog
@@ -186,6 +159,22 @@
       </template>
     </Dialog>
 
+    <!-- Payment Webview Dialog -->
+    <Dialog
+      v-model:visible="isPaymentWebviewVisible"
+      maximized
+      modal
+      header="Secure Payment"
+      :closable="true"
+      :contentStyle="{ padding: 0, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }"
+    >
+      <webview
+        v-if="activePaymentUrl"
+        :src="activePaymentUrl"
+        style="flex: 1; width: 100%; height: 100%; border: none; background: #fff;"
+      ></webview>
+    </Dialog>
+
     <!-- Toast for Notifications -->
     <Toast />
   </div>
@@ -219,8 +208,9 @@ const isHistoryVisible = ref(false);
 const isLoadingHistory = ref(false);
 const transactions = ref([]);
 
-const isConfirmVisible = ref(false);
 const isPaymentDialogVisible = ref(false);
+const isPaymentWebviewVisible = ref(false);
+const activePaymentUrl = ref("");
 const selectedPlan = ref(null);
 const isSubscribing = ref(false);
 
@@ -329,20 +319,24 @@ const getStatusSeverity = (status) => {
 	}
 };
 
-const handleSubscribeClick = (plan) => {
+const handleSubscribeClick = async (plan) => {
 	selectedPlan.value = plan;
 	const currentPrice =
 		billingCycle.value === "monthly" ? plan.priceMonthly : plan.priceAnnually;
 
 	if (currentPrice === 0 || !currentPrice) {
-		isConfirmVisible.value = true;
+		await proceedSubscription();
 	} else {
 		const paymentLink =
 			billingCycle.value === "monthly"
 				? plan.paymentLinkMonthly
 				: plan.paymentLinkAnnually;
 		if (paymentLink) {
-			window.open(paymentLink, "_blank");
+			const url = new URL(paymentLink);
+			url.searchParams.set("name", currentUser.value.name);
+			url.searchParams.set("email", currentUser.value.email);
+			activePaymentUrl.value = url.toString();
+			isPaymentWebviewVisible.value = true;
 		} else {
 			isPaymentDialogVisible.value = true;
 		}
@@ -381,11 +375,9 @@ const proceedSubscription = async () => {
 
 		// Create transaction record
 		await databases.createDocument(
-			{
-				databaseId: DB_ID,
-				collectionId: "user_subscription_transactions",
-				documentId: ID.unique(),
-			},
+			DB_ID,
+			"user_subscription_transactions",
+			ID.unique(),
 			{
 				userId: currentUser.value.$id,
 				planId: selectedPlan.value.$id,
@@ -401,7 +393,6 @@ const proceedSubscription = async () => {
 		activeSubscription.value = subDoc;
 		authStore.setSubscriptionStatus(true, selectedPlan.value);
 
-		isConfirmVisible.value = false;
 		toast.add({
 			severity: "success",
 			summary: "Success",
