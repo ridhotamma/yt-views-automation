@@ -1,6 +1,8 @@
 {
 	"name": "youtumate",
 	"productName": "Youtumate",
+	"description": "Youtube Views Automation",
+	"author": "Ridho Tamma",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -28,7 +30,10 @@
 			"target": [
 				{
 					"target": "dmg",
-					"arch": ["x64", "arm64"]
+					"arch": [
+						"x64",
+						"arm64"
+					]
 				}
 			]
 		},
@@ -37,7 +42,10 @@
 			"target": [
 				{
 					"target": "nsis",
-					"arch": ["x64", "ia32"]
+					"arch": [
+						"x64",
+						"ia32"
+					]
 				}
 			]
 		}

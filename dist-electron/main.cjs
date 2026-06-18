@@ -2,135 +2,141 @@ let electron = require("electron");
 let node_path = require("node:path");
 let node_url = require("node:url");
 //#region electron/main.js
-var _0x1c37b1 = _0x38ed;
-function _0x38ed(_0xf81613, _0x166cbf) {
-	_0xf81613 = _0xf81613 - 167;
-	return _0x5ecd()[_0xf81613];
-}
-(function(_0x193367, _0x1a3657) {
-	const _0x543b27 = _0x38ed, _0x3c049a = _0x193367();
+var _0x1d5d2d = _0x2575;
+(function(_0x485988, _0x43f2fd) {
+	const _0x5624da = _0x2575, _0x4e40ef = _0x485988();
 	while (true) try {
-		if (parseInt(_0x543b27(172)) / 1 * (-parseInt(_0x543b27(177)) / 2) + -parseInt(_0x543b27(175)) / 3 * (-parseInt(_0x543b27(202)) / 4) + -parseInt(_0x543b27(203)) / 5 * (parseInt(_0x543b27(171)) / 6) + parseInt(_0x543b27(187)) / 7 * (parseInt(_0x543b27(220)) / 8) + parseInt(_0x543b27(213)) / 9 * (parseInt(_0x543b27(183)) / 10) + -parseInt(_0x543b27(197)) / 11 + -parseInt(_0x543b27(207)) / 12 * (-parseInt(_0x543b27(196)) / 13) === _0x1a3657) break;
-		else _0x3c049a["push"](_0x3c049a["shift"]());
-	} catch (_0xdac696) {
-		_0x3c049a["push"](_0x3c049a["shift"]());
+		if (-parseInt(_0x5624da(263)) / 1 * (parseInt(_0x5624da(289)) / 2) + -parseInt(_0x5624da(286)) / 3 + parseInt(_0x5624da(303)) / 4 + -parseInt(_0x5624da(325)) / 5 * (parseInt(_0x5624da(260)) / 6) + -parseInt(_0x5624da(322)) / 7 * (parseInt(_0x5624da(299)) / 8) + parseInt(_0x5624da(268)) / 9 * (-parseInt(_0x5624da(288)) / 10) + parseInt(_0x5624da(315)) / 11 === _0x43f2fd) break;
+		else _0x4e40ef["push"](_0x4e40ef["shift"]());
+	} catch (_0x349184) {
+		_0x4e40ef["push"](_0x4e40ef["shift"]());
 	}
-})(_0x5ecd, 164013);
-var currentDir = typeof __dirname !== _0x1c37b1(198) ? __dirname : (0, node_path.dirname)((0, node_url.fileURLToPath)(require("url").pathToFileURL(__filename).href));
-process[_0x1c37b1(218)][_0x1c37b1(224)] = (0, node_path.join)(currentDir, "../dist"), process[_0x1c37b1(218)][_0x1c37b1(208)] = electron.app["isPackaged"] ? process.env["DIST"] : (0, node_path.join)(process.env["DIST"], _0x1c37b1(222)), electron.app[_0x1c37b1(211)](_0x1c37b1(229));
-var win;
-var VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-function _0x5ecd() {
-	const _0x1ffc82 = [
-		"undefined",
+})(_0x78b1, 715870);
+function _0x78b1() {
+	const _0x71e7a1 = [
+		"toLocaleString",
+		"reload",
+		"restore",
+		"main-process-message",
+		"[Proxy] Failed to set proxy for ",
+		"activate",
+		"248OshQlg",
 		"quit",
+		"then",
+		"platform",
+		"4032568GJLoAS",
+		"requestSingleInstanceLock",
+		"file://",
+		"log",
+		"will-redirect",
+		"send",
+		" for ",
+		"env",
+		"loadFile",
 		"/images/favicon.png",
+		"workAreaSize",
+		"will-navigate",
+		"36615810cSwTtW",
+		"length",
+		"find",
+		"setProxy",
+		"startsWith",
+		"preventDefault",
+		"deep-link",
+		"165452tgaFTC",
+		"darwin",
 		"setIcon",
-		"16lqfcbt",
-		"25PYZenX",
+		"2845OsAAtf",
+		"did-finish-load",
+		"[Proxy] Set ",
+		"set-proxy",
+		"window-all-closed",
+		"14970KaUxPk",
+		"setName",
+		"whenReady",
+		"4AuSWAP",
 		"setAsDefaultProtocolClient",
+		"VITE_PUBLIC",
+		"includes",
+		"Youtumate",
+		"4428MUnnVV",
+		"DIST",
+		"dock",
+		"youtumate://",
+		"../dist",
+		"focus",
+		"../public",
+		"getAllWindows",
+		"close",
+		"webContents",
 		"handle",
 		"argv",
-		"12okHpjG",
-		"VITE_PUBLIC",
-		"getPrimaryDisplay",
-		"loadURL",
-		"setName",
-		"requestSingleInstanceLock",
-		"369itUAwy",
-		"workAreaSize",
+		"defaultApp",
 		"preload.js",
 		"http://localhost/callback",
-		"open-url",
-		"env",
-		"toLocaleString",
-		"2090792jSxNWQ",
-		"deep-link",
-		"../public",
-		"startsWith",
-		"DIST",
-		"youtumate://",
-		"youtumate",
-		"webContents",
-		"will-navigate",
-		"Youtumate",
-		"loadFile",
-		"will-redirect",
-		"restore",
+		"undefined",
 		"second-instance",
-		"whenReady",
-		"140172UraeRq",
-		"16rXwUME",
-		"darwin",
-		"index.html",
-		"87627GZYkZh",
-		"main-process-message",
-		"580MzwJVo",
-		"[Proxy] Set ",
-		"preventDefault",
-		"account/sessions/oauth2",
-		"defaultApp",
-		"focus",
-		"46180bnONwW",
-		"activate",
-		"reload",
-		"execPath",
-		"7pKCBVI",
-		"window-all-closed",
 		"fromPartition",
-		"isMinimized",
-		"floor",
-		"send",
-		"length",
-		"then",
-		"error",
-		"84955NAExit",
-		"3174545BeQjgm"
+		"3605037gzfsnO",
+		"execPath",
+		"250HEQjvs",
+		"127316KDiykF",
+		"getPrimaryDisplay",
+		"isPackaged",
+		"error"
 	];
-	_0x5ecd = function() {
-		return _0x1ffc82;
+	_0x78b1 = function() {
+		return _0x71e7a1;
 	};
-	return _0x5ecd();
+	return _0x78b1();
 }
-process[_0x1c37b1(181)] ? process[_0x1c37b1(206)][_0x1c37b1(193)] >= 2 && electron.app[_0x1c37b1(204)](_0x1c37b1(226), process[_0x1c37b1(186)], [(0, node_path.join)(process[_0x1c37b1(206)][1])]) : electron.app[_0x1c37b1(204)](_0x1c37b1(226));
+var currentDir = typeof __dirname !== _0x1d5d2d(283) ? __dirname : (0, node_path.dirname)((0, node_url.fileURLToPath)(require("url").pathToFileURL(__filename).href));
+process[_0x1d5d2d(310)]["DIST"] = (0, node_path.join)(currentDir, _0x1d5d2d(272)), process.env["VITE_PUBLIC"] = electron.app[_0x1d5d2d(291)] ? process.env[_0x1d5d2d(269)] : (0, node_path.join)(process[_0x1d5d2d(310)][_0x1d5d2d(269)], _0x1d5d2d(274)), electron.app[_0x1d5d2d(261)](_0x1d5d2d(267));
+var win;
+function _0x2575(_0x2c4c21, _0x403729) {
+	_0x2c4c21 = _0x2c4c21 - 259;
+	return _0x78b1()[_0x2c4c21];
+}
+var VITE_DEV_SERVER_URL = process[_0x1d5d2d(310)]["VITE_DEV_SERVER_URL"];
+process[_0x1d5d2d(280)] ? process[_0x1d5d2d(279)]["length"] >= 2 && electron.app[_0x1d5d2d(264)]("youtumate", process[_0x1d5d2d(287)], [(0, node_path.join)(process[_0x1d5d2d(279)][1])]) : electron.app["setAsDefaultProtocolClient"]("youtumate");
 var deepLinkUrl = null;
-function handleDeepLink(_0xad6919) {
-	const _0xca83a2 = _0x1c37b1;
-	win && win["webContents"] ? win["webContents"][_0xca83a2(192)](_0xca83a2(221), _0xad6919) : deepLinkUrl = _0xad6919;
+function handleDeepLink(_0x4af724) {
+	const _0x2047e2 = _0x1d5d2d;
+	win && win["webContents"] ? win[_0x2047e2(277)][_0x2047e2(308)](_0x2047e2(321), _0x4af724) : deepLinkUrl = _0x4af724;
 }
-!electron.app[_0x1c37b1(212)]() ? electron.app[_0x1c37b1(199)]() : electron.app["on"](_0x1c37b1(169), (_0x423291, _0x2729c2, _0x5265a6) => {
-	const _0x5a036e = _0x1c37b1;
+!electron.app[_0x1d5d2d(304)]() ? electron.app[_0x1d5d2d(300)]() : electron.app["on"](_0x1d5d2d(284), (_0x7b9353, _0x3b221b, _0x48443d) => {
+	const _0x5b1cec = _0x1d5d2d;
 	if (win) {
-		if (win[_0x5a036e(190)]()) win[_0x5a036e(168)]();
-		win[_0x5a036e(182)]();
-		const _0x21216c = _0x2729c2["find"]((_0x3120a2) => _0x3120a2[_0x5a036e(223)](_0x5a036e(225)));
-		_0x21216c && handleDeepLink(_0x21216c);
+		if (win["isMinimized"]()) win[_0x5b1cec(295)]();
+		win[_0x5b1cec(273)]();
+		const _0x4af5c3 = _0x3b221b[_0x5b1cec(317)]((_0x40e074) => _0x40e074[_0x5b1cec(319)](_0x5b1cec(271)));
+		_0x4af5c3 && handleDeepLink(_0x4af5c3);
 	}
 });
-electron.app["on"](_0x1c37b1(217), (_0xdd576a, _0x47c940) => {
-	_0xdd576a[_0x1c37b1(179)](), handleDeepLink(_0x47c940);
+electron.app["on"]("open-url", (_0x1d77e0, _0xb82a11) => {
+	_0x1d77e0[_0x1d5d2d(320)](), handleDeepLink(_0xb82a11);
 });
 function createWindow() {
-	const _0x39ad1c = _0x1c37b1, { width: _0x35e0dc, height: _0x5e12b6 } = electron.screen[_0x39ad1c(209)]()[_0x39ad1c(214)], _0x34abfc = (0, node_path.join)(process[_0x39ad1c(218)][_0x39ad1c(208)], _0x39ad1c(200));
-	process["platform"] === "darwin" && electron.app["dock"][_0x39ad1c(201)](_0x34abfc), win = new electron.BrowserWindow({
-		"title": _0x39ad1c(229),
-		"width": Math[_0x39ad1c(191)](_0x35e0dc / 2),
-		"height": Math["floor"](_0x5e12b6 * .9),
-		"minWidth": Math[_0x39ad1c(191)](_0x35e0dc / 2),
+	const _0x9a0165 = _0x1d5d2d, { width: _0x2bcac0, height: _0x2c43fd } = electron.screen[_0x9a0165(290)]()[_0x9a0165(313)], _0x3a3d5c = (0, node_path.join)(process[_0x9a0165(310)][_0x9a0165(265)], _0x9a0165(312));
+	process[_0x9a0165(302)] === _0x9a0165(323) && electron.app[_0x9a0165(270)][_0x9a0165(324)](_0x3a3d5c), win = new electron.BrowserWindow({
+		"title": _0x9a0165(267),
+		"width": Math["floor"](_0x2bcac0 / 2),
+		"height": Math["floor"](_0x2c43fd * .9),
+		"minWidth": Math["floor"](_0x2bcac0 / 2),
 		"minHeight": 600,
-		"icon": _0x34abfc,
+		"icon": _0x3a3d5c,
 		"webPreferences": {
-			"preload": (0, node_path.join)(currentDir, _0x39ad1c(215)),
+			"preload": (0, node_path.join)(currentDir, _0x9a0165(281)),
 			"webviewTag": true
 		}
-	}), win[_0x39ad1c(227)]["on"]("did-finish-load", () => {
-		const _0x4012c4 = _0x39ad1c;
-		win?.[_0x4012c4(227)]["send"](_0x4012c4(176), (/* @__PURE__ */ new Date())[_0x4012c4(219)]()), deepLinkUrl && (win[_0x4012c4(227)]["send"](_0x4012c4(221), deepLinkUrl), deepLinkUrl = null);
-	}), win["webContents"]["on"](_0x39ad1c(228), (_0x3f8f98, _0x5d157) => {
-		const _0x554212 = _0x39ad1c;
-		if ((VITE_DEV_SERVER_URL ? !_0x5d157[_0x554212(223)](VITE_DEV_SERVER_URL) : !_0x5d157[_0x554212(223)]("file://")) && _0x5d157["includes"](_0x554212(180))) {
-			_0x3f8f98[_0x554212(179)]();
-			const _0x404bfd = new electron.BrowserWindow({
+	}), win[_0x9a0165(277)]["on"](_0x9a0165(326), () => {
+		const _0x1e8806 = _0x9a0165;
+		win?.[_0x1e8806(277)][_0x1e8806(308)](_0x1e8806(296), (/* @__PURE__ */ new Date())[_0x1e8806(293)]()), deepLinkUrl && (win["webContents"][_0x1e8806(308)]("deep-link", deepLinkUrl), deepLinkUrl = null);
+	}), win[_0x9a0165(277)]["on"]("will-navigate", (_0x573a42, _0x26b6bc) => {
+		const _0x191290 = _0x9a0165;
+		if ((VITE_DEV_SERVER_URL ? !_0x26b6bc[_0x191290(319)](VITE_DEV_SERVER_URL) : !_0x26b6bc[_0x191290(319)](_0x191290(305))) && _0x26b6bc[_0x191290(266)]("account/sessions/oauth2")) {
+			_0x573a42[_0x191290(320)]();
+			const _0xcf5cb3 = new electron.BrowserWindow({
 				"width": 600,
 				"height": 700,
 				"webPreferences": {
@@ -138,29 +144,29 @@ function createWindow() {
 					"contextIsolation": true
 				}
 			});
-			_0x404bfd[_0x554212(210)](_0x5d157);
-			const _0x315ebf = (_0x3d79c4, _0x18de09) => {
-				const _0x10416a = _0x554212;
-				(VITE_DEV_SERVER_URL ? _0x18de09[_0x10416a(223)](VITE_DEV_SERVER_URL) : _0x18de09[_0x10416a(223)]("file://") || _0x18de09["startsWith"](_0x10416a(225)) || _0x18de09[_0x10416a(223)](_0x10416a(216))) && (_0x3d79c4[_0x10416a(179)](), _0x404bfd["close"](), win[_0x10416a(185)]());
+			_0xcf5cb3["loadURL"](_0x26b6bc);
+			const _0x1352c1 = (_0x5c3001, _0x5df7fb) => {
+				const _0x4a5928 = _0x191290;
+				(VITE_DEV_SERVER_URL ? _0x5df7fb[_0x4a5928(319)](VITE_DEV_SERVER_URL) : _0x5df7fb["startsWith"](_0x4a5928(305)) || _0x5df7fb[_0x4a5928(319)](_0x4a5928(271)) || _0x5df7fb[_0x4a5928(319)](_0x4a5928(282))) && (_0x5c3001[_0x4a5928(320)](), _0xcf5cb3[_0x4a5928(276)](), win[_0x4a5928(294)]());
 			};
-			_0x404bfd[_0x554212(227)]["on"](_0x554212(228), _0x315ebf), _0x404bfd[_0x554212(227)]["on"](_0x554212(167), _0x315ebf);
+			_0xcf5cb3[_0x191290(277)]["on"](_0x191290(314), _0x1352c1), _0xcf5cb3[_0x191290(277)]["on"](_0x191290(307), _0x1352c1);
 		}
-	}), VITE_DEV_SERVER_URL ? win["loadURL"](VITE_DEV_SERVER_URL) : win[_0x39ad1c(230)]((0, node_path.join)(process[_0x39ad1c(218)]["DIST"], _0x39ad1c(174)));
+	}), VITE_DEV_SERVER_URL ? win["loadURL"](VITE_DEV_SERVER_URL) : win[_0x9a0165(311)]((0, node_path.join)(process[_0x9a0165(310)][_0x9a0165(269)], "index.html"));
 }
-electron.ipcMain[_0x1c37b1(205)]("set-proxy", async (_0x3b841e, _0x31b4a6, _0xfa15a9) => {
-	const _0x70ef11 = _0x1c37b1;
+electron.ipcMain[_0x1d5d2d(278)](_0x1d5d2d(328), async (_0x29b4cf, _0xcc670a, _0x12c54c) => {
+	const _0x1a4368 = _0x1d5d2d;
 	try {
-		return await electron.session[_0x70ef11(189)](_0x31b4a6)["setProxy"]({ "proxyRules": _0xfa15a9 }), console["log"](_0x70ef11(178) + _0xfa15a9 + " for " + _0x31b4a6), true;
-	} catch (_0x3c72a1) {
-		return console[_0x70ef11(195)]("[Proxy] Failed to set proxy for " + _0x31b4a6 + ":", _0x3c72a1), false;
+		return await electron.session[_0x1a4368(285)](_0xcc670a)[_0x1a4368(318)]({ "proxyRules": _0x12c54c }), console[_0x1a4368(306)](_0x1a4368(327) + _0x12c54c + _0x1a4368(309) + _0xcc670a), true;
+	} catch (_0x572085) {
+		return console[_0x1a4368(292)](_0x1a4368(297) + _0xcc670a + ":", _0x572085), false;
 	}
-}), electron.app["on"](_0x1c37b1(188), () => {
-	const _0x494a8e = _0x1c37b1;
-	process["platform"] !== _0x494a8e(173) && (electron.app["quit"](), win = null);
-}), electron.app["on"](_0x1c37b1(184), () => {
-	const _0x138c43 = _0x1c37b1;
-	electron.BrowserWindow["getAllWindows"]()[_0x138c43(193)] === 0 && createWindow();
-}), electron.app[_0x1c37b1(170)]()[_0x1c37b1(194)](() => {
+}), electron.app["on"](_0x1d5d2d(259), () => {
+	const _0x517078 = _0x1d5d2d;
+	process[_0x517078(302)] !== _0x517078(323) && (electron.app["quit"](), win = null);
+}), electron.app["on"](_0x1d5d2d(298), () => {
+	const _0x260c4e = _0x1d5d2d;
+	electron.BrowserWindow[_0x260c4e(275)]()[_0x260c4e(316)] === 0 && createWindow();
+}), electron.app[_0x1d5d2d(262)]()[_0x1d5d2d(301)](() => {
 	createWindow();
 });
 //#endregion
