@@ -11,13 +11,6 @@
           :allowEmpty="false"
         />
         <Button
-          icon="pi pi-refresh"
-          outlined
-          @click="refreshSubscription"
-          :loading="isRefreshing"
-          v-tooltip.top="'Refresh'"
-        />
-        <Button
           :label="$t('subscriptions.history')"
           icon="pi pi-history"
           outlined
@@ -258,7 +251,6 @@ const isPaymentWebviewVisible = ref(false);
 const activePaymentUrl = ref("");
 const selectedPlan = ref(null);
 const isSubscribing = ref(false);
-const isRefreshing = ref(false);
 
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
@@ -319,17 +311,6 @@ const fetchActiveSubscription = async () => {
 		activeSubscription.value = subsRes.documents[0];
 	} else {
 		activeSubscription.value = null;
-	}
-};
-
-const refreshSubscription = async () => {
-	isRefreshing.value = true;
-	try {
-		await fetchActiveSubscription();
-	} catch (e) {
-		console.error("Failed to refresh subscription", e);
-	} finally {
-		isRefreshing.value = false;
 	}
 };
 
