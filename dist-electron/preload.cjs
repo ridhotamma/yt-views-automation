@@ -37,57 +37,58 @@ var import_electron = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	}
 	module.exports = getElectronPath();
 })))();
-function _0x392a() {
-	const _0x37d48a = [
-		"2936pMIOzk",
-		"2645nIWLeC",
-		"send",
-		"438814ICzeQg",
-		"77MRaHID",
-		"1wdzRlu",
-		"825590ACfhsa",
-		"227064SczMQg",
-		"invoke",
-		"946488CuoBqS",
-		"1346445RXFlsS",
-		"7yBohzU",
-		"1127130CVrwdF",
-		"off"
-	];
-	_0x392a = function() {
-		return _0x37d48a;
-	};
-	return _0x392a();
-}
-function _0x2879(_0x37ca15, _0x5d9b95) {
-	_0x37ca15 = _0x37ca15 - 457;
-	return _0x392a()[_0x37ca15];
-}
-(function(_0x376ab0, _0x102dfc) {
-	const _0x1f70ef = _0x2879, _0x40657c = _0x376ab0();
+var _0x412c62 = _0x3234;
+(function(_0xf8775f, _0x25a4f4) {
+	const _0x1c519a = _0x3234, _0x7633d0 = _0xf8775f();
 	while (true) try {
-		if (parseInt(_0x1f70ef(462)) / 1 * (parseInt(_0x1f70ef(460)) / 2) + parseInt(_0x1f70ef(464)) / 3 + -parseInt(_0x1f70ef(457)) / 4 * (parseInt(_0x1f70ef(458)) / 5) + parseInt(_0x1f70ef(469)) / 6 * (-parseInt(_0x1f70ef(468)) / 7) + parseInt(_0x1f70ef(466)) / 8 + -parseInt(_0x1f70ef(467)) / 9 + -parseInt(_0x1f70ef(463)) / 10 * (-parseInt(_0x1f70ef(461)) / 11) === _0x102dfc) break;
-		else _0x40657c["push"](_0x40657c["shift"]());
-	} catch (_0x235299) {
-		_0x40657c["push"](_0x40657c["shift"]());
+		if (-parseInt(_0x1c519a(103)) / 1 + parseInt(_0x1c519a(109)) / 2 + -parseInt(_0x1c519a(108)) / 3 + -parseInt(_0x1c519a(105)) / 4 * (parseInt(_0x1c519a(112)) / 5) + -parseInt(_0x1c519a(115)) / 6 + -parseInt(_0x1c519a(110)) / 7 * (-parseInt(_0x1c519a(104)) / 8) + parseInt(_0x1c519a(114)) / 9 * (parseInt(_0x1c519a(113)) / 10) === _0x25a4f4) break;
+		else _0x7633d0["push"](_0x7633d0["shift"]());
+	} catch (_0x633fb1) {
+		_0x7633d0["push"](_0x7633d0["shift"]());
 	}
-})(_0x392a, 265573);
-import_electron.contextBridge["exposeInMainWorld"]("ipcRenderer", {
-	"on"(..._0x1e23f0) {
-		const [_0x1124ef, _0x30a377] = _0x1e23f0;
-		return import_electron.ipcRenderer["on"](_0x1124ef, (_0x4dfbbd, ..._0x3145a2) => _0x30a377(_0x4dfbbd, ..._0x3145a2));
+})(_0x4859, 632295);
+function _0x3234(_0x621417, _0xe60bbc) {
+	_0x621417 = _0x621417 - 103;
+	return _0x4859()[_0x621417];
+}
+import_electron.contextBridge[_0x412c62(116)](_0x412c62(111), {
+	"on"(..._0xc5cbef) {
+		const [_0x168b69, _0x337981] = _0xc5cbef;
+		return import_electron.ipcRenderer["on"](_0x168b69, (_0x229386, ..._0x47f912) => _0x337981(_0x229386, ..._0x47f912));
 	},
-	"off"(..._0x1e018a) {
-		const _0x315ac1 = _0x2879, [_0x11812d, ..._0x45b01d] = _0x1e018a;
-		return import_electron.ipcRenderer[_0x315ac1(470)](_0x11812d, ..._0x45b01d);
+	"off"(..._0x3464de) {
+		const _0x415449 = _0x412c62, [_0x31ef76, ..._0xad5572] = _0x3464de;
+		return import_electron.ipcRenderer[_0x415449(107)](_0x31ef76, ..._0xad5572);
 	},
-	"send"(..._0x2fd51c) {
-		const _0x290717 = _0x2879, [_0x239d41, ..._0x2b19b4] = _0x2fd51c;
-		return import_electron.ipcRenderer[_0x290717(459)](_0x239d41, ..._0x2b19b4);
+	"send"(..._0x9887f3) {
+		const _0x1325c2 = _0x412c62, [_0x1a28a4, ..._0xed39f4] = _0x9887f3;
+		return import_electron.ipcRenderer[_0x1325c2(106)](_0x1a28a4, ..._0xed39f4);
 	},
-	"invoke"(..._0x37eb9d) {
-		const _0x209b0f = _0x2879, [_0x1b9117, ..._0x1e9c33] = _0x37eb9d;
-		return import_electron.ipcRenderer[_0x209b0f(465)](_0x1b9117, ..._0x1e9c33);
+	"invoke"(..._0x45bac0) {
+		const [_0x1884d2, ..._0xb62b9e] = _0x45bac0;
+		return import_electron.ipcRenderer["invoke"](_0x1884d2, ..._0xb62b9e);
 	}
 });
+function _0x4859() {
+	const _0x481b4a = [
+		"253012dhYMOG",
+		"send",
+		"off",
+		"3364674cHIdqA",
+		"1309406AwzAfJ",
+		"14OieWOV",
+		"ipcRenderer",
+		"90wlbRJq",
+		"2314910OtMoFh",
+		"63dVBSDw",
+		"216720ZjpYUc",
+		"exposeInMainWorld",
+		"552215DWIvMc",
+		"4822408eObIKl"
+	];
+	_0x4859 = function() {
+		return _0x481b4a;
+	};
+	return _0x4859();
+}
 //#endregion
