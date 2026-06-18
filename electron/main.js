@@ -121,7 +121,7 @@ function createWindow() {
 			const handleRedirect = (e, newUrl) => {
 				const isInternal = VITE_DEV_SERVER_URL
 					? newUrl.startsWith(VITE_DEV_SERVER_URL)
-					: newUrl.startsWith("file://") || newUrl.startsWith("youtumate://");
+					: newUrl.startsWith("file://") || newUrl.startsWith("youtumate://") || newUrl.startsWith("http://localhost/callback");
 
 				if (isInternal) {
 					e.preventDefault();

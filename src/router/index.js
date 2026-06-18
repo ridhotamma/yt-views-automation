@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import { h } from "vue";
 const EmptyView = { render: () => h("div") };
 import ProxyScreen from "../modules/proxy/Screen.vue";
@@ -8,7 +8,7 @@ import LoginScreen from "../modules/auth/Screen.vue";
 import { useAuthStore } from "../store/auth.js";
 
 const router = createRouter({
-	history: createWebHistory(),
+	history: createWebHashHistory(),
 	routes: [
 		{
 			path: "/login",

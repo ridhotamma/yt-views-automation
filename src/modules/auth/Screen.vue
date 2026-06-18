@@ -30,8 +30,8 @@ const authError = ref("");
 
 const handleGoogleLogin = () => {
 	try {
-		const successUrl = window.location.origin + "/";
-		const failureUrl = window.location.origin + "/login";
+		const successUrl = import.meta.env.DEV ? window.location.origin + "/" : "http://localhost/callback";
+		const failureUrl = import.meta.env.DEV ? window.location.origin + "/login" : "http://localhost/callback";
 		account.createOAuth2Session(OAuthProvider.Google, successUrl, failureUrl);
 	} catch (error) {
 		authError.value = t("auth.failedGoogle");
