@@ -327,8 +327,12 @@ onMounted(async () => {
 			realtimeUnsubscribe = client.subscribe(
 				`databases.${DB_ID}.collections.user_subscriptions.documents`,
 				(response) => {
+					const payloadUserId = typeof response.payload.userId === 'object' && response.payload.userId !== null 
+						? response.payload.userId.$id 
+						: response.payload.userId;
+						
 					if (
-						response.payload.userId === currentUser.value.$id &&
+						payloadUserId === currentUser.value.$id &&
 						response.payload.status === "active"
 					) {
 						// Payment successful, update state!
