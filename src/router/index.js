@@ -1,10 +1,12 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import { h } from "vue";
 const EmptyView = { render: () => h("div") };
-import ProxyScreen from "../modules/proxy/Screen.vue";
-import SubscriptionScreen from "../modules/subscription/Screen.vue";
-import SettingsScreen from "../modules/settings/Screen.vue";
-import LoginScreen from "../modules/auth/Screen.vue";
+
+const ProxyScreen = () => import("../modules/proxy/Screen.vue");
+const SubscriptionScreen = () => import("../modules/subscription/Screen.vue");
+const SettingsScreen = () => import("../modules/settings/Screen.vue");
+const LoginScreen = () => import("../modules/auth/Screen.vue");
+
 import { useAuthStore } from "../store/auth.js";
 
 const router = createRouter({
