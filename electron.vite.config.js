@@ -9,12 +9,13 @@ const obfuscatorPlugin = obfuscator({
   apply: 'build',
   options: {
     compact: true,
-    controlFlowFlattening: true,
+    controlFlowFlattening: false,
     deadCodeInjection: false,
     debugProtection: false,
     disableConsoleOutput: false,
     stringArray: true,
-    stringArrayEncoding: ['base64'],
+    stringArrayEncoding: [],
+    stringArrayThreshold: 0.75
   }
 });
 

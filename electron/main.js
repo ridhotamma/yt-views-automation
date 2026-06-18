@@ -78,6 +78,7 @@ function createWindow() {
 	}
 
 	win = new BrowserWindow({
+		title: "Youtumate",
 		width: Math.floor(width / 2),
 		height: Math.floor(height * 0.9),
 		minWidth: Math.floor(width / 2),
