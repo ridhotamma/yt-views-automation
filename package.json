@@ -25,7 +25,8 @@
 		},
 		"files": [
 			"dist",
-			"dist-electron"
+			"dist-electron",
+			"!node_modules"
 		],
 		"mac": {
 			"icon": "build/icon.icns",
@@ -45,8 +46,7 @@
 				{
 					"target": "nsis",
 					"arch": [
-						"x64",
-						"ia32"
+						"x64"
 					]
 				}
 			]
