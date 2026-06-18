@@ -15,6 +15,7 @@
           outlined
           @click="refreshSubscription"
           :loading="isRefreshing"
+          v-tooltip.top="'Refresh'"
         />
         <Button
           :label="$t('subscriptions.history')"
