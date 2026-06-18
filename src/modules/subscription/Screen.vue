@@ -11,6 +11,13 @@
           :allowEmpty="false"
         />
         <Button
+          icon="pi pi-refresh"
+          outlined
+          @click="refreshSubscription"
+          :loading="isRefreshing"
+          v-tooltip.top="'Refresh'"
+        />
+        <Button
           :label="$t('subscriptions.history')"
           icon="pi pi-history"
           outlined
@@ -251,6 +258,7 @@ const isPaymentWebviewVisible = ref(false);
 const activePaymentUrl = ref("");
 const selectedPlan = ref(null);
 const isSubscribing = ref(false);
+const isRefreshing = ref(false);
 
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
@@ -294,6 +302,37 @@ const currentPlanDetails = computed(() => {
 
 let realtimeUnsubscribe = null;
 
+const fetchActiveSubscription = async () => {
+	if (!currentUser.value) return;
+	const subsRes = await databases.listDocuments({
+		databaseId: DB_ID,
+		collectionId: "user_subscriptions",
+		queries: [
+			Query.equal("userId", currentUser.value.$id),
+			Query.equal("status", "active"),
+			Query.orderDesc("$createdAt"),
+			Query.limit(1),
+		],
+	});
+
+	if (subsRes.documents.length > 0) {
+		activeSubscription.value = subsRes.documents[0];
+	} else {
+		activeSubscription.value = null;
+	}
+};
+
+const refreshSubscription = async () => {
+	isRefreshing.value = true;
+	try {
+		await fetchActiveSubscription();
+	} catch (e) {
+		console.error("Failed to refresh subscription", e);
+	} finally {
+		isRefreshing.value = false;
+	}
+};
+
 onMounted(async () => {
 	isLoading.value = true;
 	try {
@@ -306,29 +345,18 @@ onMounted(async () => {
 			});
 			plans.value = plansRes.documents;
 
-			const subsRes = await databases.listDocuments({
-				databaseId: DB_ID,
-				collectionId: "user_subscriptions",
-				queries: [
-					Query.equal("userId", currentUser.value.$id),
-					Query.equal("status", "active"),
-					Query.orderDesc("$createdAt"),
-					Query.limit(1),
-				],
-			});
-
-			if (subsRes.documents.length > 0) {
-				activeSubscription.value = subsRes.documents[0];
-			} else {
-				activeSubscription.value = null;
-			}
+			await fetchActiveSubscription();
 
 			// Listen for realtime updates from the webhook
 			realtimeUnsubscribe = client.subscribe(
 				`databases.${DB_ID}.collections.user_subscriptions.documents`,
 				(response) => {
+					const payloadUserId = typeof response.payload.userId === 'object' && response.payload.userId !== null 
+						? response.payload.userId.$id 
+						: response.payload.userId;
+						
 					if (
-						response.payload.userId === currentUser.value.$id &&
+						payloadUserId === currentUser.value.$id &&
 						response.payload.status === "active"
 					) {
 						// Payment successful, update state!

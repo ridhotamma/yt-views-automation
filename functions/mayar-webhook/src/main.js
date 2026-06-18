@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID, Users } from "node-appwrite";
+import { Client, Databases, Query, ID, Users, Permission, Role } from "node-appwrite";
 
 export default async ({ req, res, log, error }) => {
 	if (req.method !== "POST") {
@@ -62,7 +62,11 @@ export default async ({ req, res, log, error }) => {
 			for (const sub of activeSubsResponse.documents) {
 				await databases.updateDocument(databaseId, subCollectionId, sub.$id, {
 					status: "inactive",
-				});
+				}, [
+					Permission.read(Role.user(userId)),
+					Permission.update(Role.user(userId)),
+					Permission.delete(Role.user(userId))
+				]);
 				log(`Deactivated old subscription ${sub.$id} for user ${userId}`);
 			}
 
@@ -85,6 +89,11 @@ export default async ({ req, res, log, error }) => {
 					startDate: now.toISOString(),
 					expiredDate: expiredDate.toISOString(),
 				},
+				[
+					Permission.read(Role.user(userId)),
+					Permission.update(Role.user(userId)),
+					Permission.delete(Role.user(userId)),
+				]
 			);
 
 			await databases.createDocument(
@@ -102,6 +111,9 @@ export default async ({ req, res, log, error }) => {
 					transactionDate: now.toISOString(),
 					referenceId: `FREE-${ID.unique().substring(0, 8).toUpperCase()}`,
 				},
+				[
+					Permission.read(Role.user(userId))
+				]
 			);
 
 			log(`Created free subscription ${subDoc.$id} for user ${userId}`);
@@ -238,7 +250,9 @@ export default async ({ req, res, log, error }) => {
 			status: "success",
 			transactionDate: new Date().toISOString(),
 			referenceId: transactionId.toString(),
-		});
+		}, [
+			Permission.read(Role.user(userId))
+		]);
 		log(`Created transaction record for ${transactionId}`);
 
 		// 5. Deactivate old subscriptions for different plans
@@ -252,7 +266,11 @@ export default async ({ req, res, log, error }) => {
 			if (sub.planId !== planId) {
 				await databases.updateDocument(databaseId, subCollectionId, sub.$id, {
 					status: "inactive",
-				});
+				}, [
+					Permission.read(Role.user(userId)),
+					Permission.update(Role.user(userId)),
+					Permission.delete(Role.user(userId))
+				]);
 				log(`Deactivated old subscription ${sub.$id} for user ${userId}`);
 			}
 		}
@@ -292,6 +310,11 @@ export default async ({ req, res, log, error }) => {
 					status: "active",
 					expiredDate: newExpiry.toISOString(),
 				},
+				[
+					Permission.read(Role.user(userId)),
+					Permission.update(Role.user(userId)),
+					Permission.delete(Role.user(userId))
+				]
 			);
 			log(`Updated subscription ${subscription.$id} for user ${userId}`);
 		} else {
@@ -301,7 +324,11 @@ export default async ({ req, res, log, error }) => {
 				status: "active",
 				startDate: now.toISOString(),
 				expiredDate: futureDate.toISOString(),
-			});
+			}, [
+				Permission.read(Role.user(userId)),
+				Permission.update(Role.user(userId)),
+				Permission.delete(Role.user(userId))
+			]);
 			log(`Created new subscription for user ${userId}`);
 		}
 
