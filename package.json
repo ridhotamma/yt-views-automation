@@ -24,6 +24,7 @@
 			"dist-electron"
 		],
 		"mac": {
+			"icon": "build/icon.icns",
 			"target": [
 				{
 					"target": "dmg",
@@ -32,6 +33,7 @@
 			]
 		},
 		"win": {
+			"icon": "build/icon.png",
 			"target": [
 				{
 					"target": "nsis",
