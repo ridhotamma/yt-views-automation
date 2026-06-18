@@ -77,7 +77,7 @@ watch(
   min-height: 100vh;
   width: 100%;
   background-color: var(--app-bg);
-  color: var(--p-primary-500, #ef4444);
+  color: var(--p-primary-500);
 }
 
 .full-screen {

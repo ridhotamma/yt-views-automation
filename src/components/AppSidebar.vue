@@ -100,7 +100,7 @@ const popover = ref();
 const isLogoutModalVisible = ref(false);
 
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value;
+	isCollapsed.value = !isCollapsed.value;
 };
 
 const preventIfLocked = (e) => {
@@ -181,7 +181,7 @@ onUnmounted(() => {
   font-weight: 700;
   font-size: 1.5rem;
   white-space: nowrap;
-  color: var(--p-primary-500, #ef4444);
+  color: var(--p-primary-500);
 }
 
 .app-logo {
@@ -206,7 +206,7 @@ onUnmounted(() => {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: var(--p-primary-500, #ef4444);
+  background-color: var(--p-primary-500);
   color: white;
   border: none;
   cursor: pointer;
@@ -347,7 +347,7 @@ onUnmounted(() => {
 }
 
 .logout-btn {
-  color: var(--p-red-500, #ef4444);
+  color: var(--p-red-500);
 }
 
 .logout-btn:hover {
