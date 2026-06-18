@@ -13,7 +13,9 @@
 		"preview": "electron-vite preview",
 		"format": "biome format --write .",
 		"pack": "bun run build && electron-builder --dir",
-		"dist": "bun run build && electron-builder --mac --win"
+		"dist": "bun run build && electron-builder",
+		"dist:win": "bun run build && electron-builder --win",
+		"dist:mac": "bun run build && electron-builder --mac"
 	},
 	"build": {
 		"appId": "com.youtumate.app",
