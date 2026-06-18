@@ -113,6 +113,7 @@ function createWindow() {
 			const authWin = new BrowserWindow({
 				width: 600,
 				height: 700,
+				autoHideMenuBar: true,
 				webPreferences: {
 					nodeIntegration: false,
 					contextIsolation: true,
