@@ -2,7 +2,10 @@ import { app, BrowserWindow, ipcMain, screen, session } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const currentDir = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
+const currentDir =
+	typeof __dirname !== "undefined"
+		? __dirname
+		: dirname(fileURLToPath(import.meta.url));
 
 // The built directory structure
 //
@@ -12,8 +15,6 @@ const currentDir = typeof __dirname !== 'undefined' ? __dirname : dirname(fileUR
 // │ ├─┬ dist-electron
 // │ │ ├── main.js
 // │ │ └── preload.js
-// │
-// ... (rest remains unchanged)
 
 process.env.DIST = join(currentDir, "../dist");
 process.env.VITE_PUBLIC = app.isPackaged
@@ -23,7 +24,8 @@ process.env.VITE_PUBLIC = app.isPackaged
 app.setName("Youtumate");
 
 let win;
-const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const VITE_DEV_SERVER_URL =
+	process.env["VITE_DEV_SERVER_URL"] || process.env["ELECTRON_RENDERER_URL"];
 
 // Register deep link protocol
 if (process.defaultApp) {
@@ -122,7 +124,9 @@ function createWindow() {
 			const handleRedirect = (e, newUrl) => {
 				const isInternal = VITE_DEV_SERVER_URL
 					? newUrl.startsWith(VITE_DEV_SERVER_URL)
-					: newUrl.startsWith("file://") || newUrl.startsWith("youtumate://") || newUrl.startsWith("http://localhost/callback");
+					: newUrl.startsWith("file://") ||
+						newUrl.startsWith("youtumate://") ||
+						newUrl.startsWith("http://localhost/callback");
 
 				if (isInternal) {
 					e.preventDefault();

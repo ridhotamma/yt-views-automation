@@ -60,24 +60,24 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 
 const themeOptions = computed(() => [
-  { label: t('settings.lightMode'), value: "light", icon: "pi pi-sun" },
-  { label: t('settings.darkMode'), value: "dark", icon: "pi pi-moon" },
+	{ label: t("settings.lightMode"), value: "light", icon: "pi pi-sun" },
+	{ label: t("settings.darkMode"), value: "dark", icon: "pi pi-moon" },
 ]);
 
 const localeOptions = ref([
-  { label: "English", value: "en" },
-  { label: "Bahasa Indonesia", value: "id" },
+	{ label: "English", value: "en" },
+	{ label: "Bahasa Indonesia", value: "id" },
 ]);
 
 const theme = ref(settingsStore.theme);
 const locale = ref(settingsStore.locale);
 
 watch(theme, (newTheme) => {
-  settingsStore.setTheme(newTheme);
+	settingsStore.setTheme(newTheme);
 });
 
 watch(locale, (newLocale) => {
-  settingsStore.setLocale(newLocale);
+	settingsStore.setLocale(newLocale);
 });
 </script>
 

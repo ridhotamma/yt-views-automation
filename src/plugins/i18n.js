@@ -46,8 +46,10 @@ const messages = {
 			annually: "Annually",
 			subscribeNow: "Subscribe Now",
 			subscribed: "Subscribed",
-			paymentUnderDev: "Payment integration (Mayar.id) is currently under development.",
-			paymentNotConfigured: "Payment link is not configured for this plan yet. Please try a free plan or check back later!",
+			paymentUnderDev:
+				"Payment integration (Mayar.id) is currently under development.",
+			paymentNotConfigured:
+				"Payment link is not configured for this plan yet. Please try a free plan or check back later!",
 			active: "Active",
 			manage: "Manage",
 			yourActivePlan: "Your Active Plan",
@@ -66,7 +68,8 @@ const messages = {
 			securePayment: "Secure Payment",
 			month: "month",
 			year: "year",
-			currentPlanDesc: "Your current plan is {name}, and will be expired at {date}.",
+			currentPlanDesc:
+				"Your current plan is {name}, and will be expired at {date}.",
 			currentPlanDescNoDate: "Your current plan is {name}.",
 		},
 		proxy: {
@@ -83,7 +86,8 @@ const messages = {
 			title: "Media Players",
 			newQueue: "New Queue",
 			noVideos: "No upcoming videos in queue.",
-			noPlayers: "No media players in queue. Add a new media player to get started.",
+			noPlayers:
+				"No media players in queue. Add a new media player to get started.",
 			addToQueue: "Add to Queue",
 			proxy: "Proxy",
 			selectProxy: "Select a proxy",
@@ -107,8 +111,8 @@ const messages = {
 				deletePlayer: "Delete Player",
 				upcomingVideos: "Upcoming Videos",
 				confirmDelete: "Are you sure you want to delete this media player?",
-			}
-		}
+			},
+		},
 	},
 	id: {
 		common: {
@@ -155,8 +159,10 @@ const messages = {
 			annually: "Tahunan",
 			subscribeNow: "Berlangganan",
 			subscribed: "Berlangganan",
-			paymentUnderDev: "Integrasi pembayaran (Mayar.id) sedang dalam tahap pengembangan.",
-			paymentNotConfigured: "Tautan pembayaran belum dikonfigurasi untuk paket ini. Silakan coba paket gratis atau periksa kembali nanti!",
+			paymentUnderDev:
+				"Integrasi pembayaran (Mayar.id) sedang dalam tahap pengembangan.",
+			paymentNotConfigured:
+				"Tautan pembayaran belum dikonfigurasi untuk paket ini. Silakan coba paket gratis atau periksa kembali nanti!",
 			active: "Aktif",
 			manage: "Kelola",
 			yourActivePlan: "Paket Aktif Anda",
@@ -175,14 +181,16 @@ const messages = {
 			securePayment: "Pembayaran Aman",
 			month: "bulan",
 			year: "tahun",
-			currentPlanDesc: "Paket Anda saat ini adalah {name}, dan akan kedaluwarsa pada {date}.",
+			currentPlanDesc:
+				"Paket Anda saat ini adalah {name}, dan akan kedaluwarsa pada {date}.",
 			currentPlanDescNoDate: "Paket Anda saat ini adalah {name}.",
 		},
 		proxy: {
 			title: "Manajemen Proxy",
 			createProxy: "Buat Proxy",
 			editProxy: "Edit Proxy",
-			noProxies: "Tidak ada proxy yang ditemukan. Buat proxy baru untuk memulai!",
+			noProxies:
+				"Tidak ada proxy yang ditemukan. Buat proxy baru untuk memulai!",
 			name: "Nama",
 			ipHost: "Alamat IP / Host",
 			createdAt: "Dibuat Pada",
@@ -192,7 +200,8 @@ const messages = {
 			title: "Pemutar Media",
 			newQueue: "Antrean Baru",
 			noVideos: "Tidak ada video yang akan datang dalam antrean.",
-			noPlayers: "Tidak ada pemutar media dalam antrean. Tambahkan pemutar media baru untuk memulai.",
+			noPlayers:
+				"Tidak ada pemutar media dalam antrean. Tambahkan pemutar media baru untuk memulai.",
 			addToQueue: "Tambahkan ke Antrean",
 			proxy: "Proxy",
 			selectProxy: "Pilih proxy",
@@ -216,8 +225,8 @@ const messages = {
 				deletePlayer: "Hapus Pemutar",
 				upcomingVideos: "Video Mendatang",
 				confirmDelete: "Apakah Anda yakin ingin menghapus pemutar media ini?",
-			}
-		}
+			},
+		},
 	},
 };
 

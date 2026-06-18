@@ -152,7 +152,7 @@ const proceedLogout = async () => {
 onMounted(async () => {
 	window.addEventListener("resize", handleResize);
 	await authStore.initAuth();
-	
+
 	if (settingsStore.theme === "dark") {
 		document.documentElement.classList.add("app-dark");
 	} else {
@@ -163,17 +163,23 @@ onMounted(async () => {
 
 import { watch } from "vue";
 
-watch(() => settingsStore.theme, (newTheme) => {
-	if (newTheme === "dark") {
-		document.documentElement.classList.add("app-dark");
-	} else {
-		document.documentElement.classList.remove("app-dark");
-	}
-});
+watch(
+	() => settingsStore.theme,
+	(newTheme) => {
+		if (newTheme === "dark") {
+			document.documentElement.classList.add("app-dark");
+		} else {
+			document.documentElement.classList.remove("app-dark");
+		}
+	},
+);
 
-watch(() => settingsStore.locale, (newLocale) => {
-	locale.value = newLocale;
-});
+watch(
+	() => settingsStore.locale,
+	(newLocale) => {
+		locale.value = newLocale;
+	},
+);
 
 onUnmounted(() => {
 	window.removeEventListener("resize", handleResize);

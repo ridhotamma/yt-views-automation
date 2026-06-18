@@ -211,11 +211,11 @@ const isLooping = ref(false);
 const loopCount = ref(0);
 const selectedUaType = ref("random");
 const uaOptions = ref([
-  { label: "Random (Any)", value: "random" },
-  { label: "Windows Desktop", value: "windows" },
-  { label: "macOS Desktop", value: "macos" },
-  { label: "iPhone Mobile", value: "iphone" },
-  { label: "Android Mobile", value: "android" },
+	{ label: "Random (Any)", value: "random" },
+	{ label: "Windows Desktop", value: "windows" },
+	{ label: "macOS Desktop", value: "macos" },
+	{ label: "iPhone Mobile", value: "iphone" },
+	{ label: "Android Mobile", value: "android" },
 ]);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
@@ -223,202 +223,202 @@ const currentUser = computed(() => authStore.user);
 const collectionId = "media_players";
 
 onMounted(async () => {
-  isLoading.value = true;
-  try {
-    await authStore.initAuth();
+	isLoading.value = true;
+	try {
+		await authStore.initAuth();
 
-    if (currentUser.value) {
-      const proxyRes = await databases.listDocuments(DB_ID, "proxies");
-      proxiesList.value = proxyRes.documents.map((doc) => ({
-        id: doc.$id,
-        name: doc.name,
-        ipAddress: doc.ipAddress,
-      }));
+		if (currentUser.value) {
+			const proxyRes = await databases.listDocuments(DB_ID, "proxies");
+			proxiesList.value = proxyRes.documents.map((doc) => ({
+				id: doc.$id,
+				name: doc.name,
+				ipAddress: doc.ipAddress,
+			}));
 
-      const res = await databases.listDocuments(DB_ID, collectionId, [
-        Query.equal("userId", currentUser.value.$id),
-        Query.orderDesc("$createdAt"),
-      ]);
+			const res = await databases.listDocuments(DB_ID, collectionId, [
+				Query.equal("userId", currentUser.value.$id),
+				Query.orderDesc("$createdAt"),
+			]);
 
-      players.value = res.documents.map((doc) => {
-        const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
-        return {
-          id: doc.$id,
-          youtubeUrls: doc.youtubeUrls,
-          currentQueue: doc.currentQueue,
-          userId: doc.userId,
-          proxyId: doc.proxyId,
-          proxyIp: proxy ? proxy.ipAddress : null,
-          userAgent: doc.userAgent,
-          isLooping: doc.isLooping || false,
-          loopCount: doc.loopCount || 0,
-          currentLoop: doc.currentLoop || 0,
-        };
-      });
-    }
-  } catch (e) {
-    console.error("Failed to fetch players", e);
-  } finally {
-    isLoading.value = false;
-  }
+			players.value = res.documents.map((doc) => {
+				const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+				return {
+					id: doc.$id,
+					youtubeUrls: doc.youtubeUrls,
+					currentQueue: doc.currentQueue,
+					userId: doc.userId,
+					proxyId: doc.proxyId,
+					proxyIp: proxy ? proxy.ipAddress : null,
+					userAgent: doc.userAgent,
+					isLooping: doc.isLooping || false,
+					loopCount: doc.loopCount || 0,
+					currentLoop: doc.currentLoop || 0,
+				};
+			});
+		}
+	} catch (e) {
+		console.error("Failed to fetch players", e);
+	} finally {
+		isLoading.value = false;
+	}
 });
 
 const resetForm = () => {
-  queueList.value = [""];
-  formError.value = "";
-  selectedProxyId.value = null;
-  selectedUaType.value = "random";
-  isLooping.value = false;
-  loopCount.value = 0;
+	queueList.value = [""];
+	formError.value = "";
+	selectedProxyId.value = null;
+	selectedUaType.value = "random";
+	isLooping.value = false;
+	loopCount.value = 0;
 };
 
 const resolver = ({ values }) => {
-  const errors = {};
-  let hasUrl = false;
+	const errors = {};
+	let hasUrl = false;
 
-  queueList.value.forEach((_, index) => {
-    const val = values[`url_${index}`];
-    if (val && val.trim()) {
-      hasUrl = true;
-      if (!ytRegex.test(val.trim())) {
-        errors[`url_${index}`] = [{ message: "Invalid YouTube URL." }];
-      }
-    }
-  });
+	queueList.value.forEach((_, index) => {
+		const val = values[`url_${index}`];
+		if (val && val.trim()) {
+			hasUrl = true;
+			if (!ytRegex.test(val.trim())) {
+				errors[`url_${index}`] = [{ message: "Invalid YouTube URL." }];
+			}
+		}
+	});
 
-  if (!hasUrl) {
-    errors["url_0"] = [{ message: "Please provide at least one valid URL." }];
-  }
+	if (!hasUrl) {
+		errors["url_0"] = [{ message: "Please provide at least one valid URL." }];
+	}
 
-  return { errors };
+	return { errors };
 };
 
 const onFormSubmit = async ({ valid }) => {
-  if (!valid) return;
-  formError.value = "";
+	if (!valid) return;
+	formError.value = "";
 
-  const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
+	const urls = queueList.value.map((u) => u.trim()).filter((u) => u);
 
-  if (authStore.activePlan) {
-    const maxVideo = authStore.activePlan.maxVideoPerQueue || 3;
-    const maxMedia = authStore.activePlan.maxMediaCreationPerDay || 5;
+	if (authStore.activePlan) {
+		const maxVideo = authStore.activePlan.maxVideoPerQueue || 3;
+		const maxMedia = authStore.activePlan.maxMediaCreationPerDay || 5;
 
-    if (urls.length > maxVideo) {
-      formError.value = `Your current plan allows a maximum of ${maxVideo} videos per queue.`;
-      return;
-    }
+		if (urls.length > maxVideo) {
+			formError.value = `Your current plan allows a maximum of ${maxVideo} videos per queue.`;
+			return;
+		}
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
 
-    try {
-      const logsRes = await databases.listDocuments(
-        DB_ID,
-        "media_creation_logs",
-        [
-          Query.equal("userId", currentUser.value.$id),
-          Query.greaterThanEqual("$createdAt", today.toISOString()),
-          Query.limit(1),
-        ],
-      );
+		try {
+			const logsRes = await databases.listDocuments(
+				DB_ID,
+				"media_creation_logs",
+				[
+					Query.equal("userId", currentUser.value.$id),
+					Query.greaterThanEqual("$createdAt", today.toISOString()),
+					Query.limit(1),
+				],
+			);
 
-      if (logsRes.total >= maxMedia) {
-        formError.value = `You have reached the maximum limit of ${maxMedia} media player creations per day for your current plan. Please try again tomorrow or upgrade your plan.`;
-        return;
-      }
-    } catch (err) {
-      console.error("Failed to check daily limits", err);
-      formError.value =
-        "Failed to verify subscription limits. Please try again.";
-      return;
-    }
-  }
+			if (logsRes.total >= maxMedia) {
+				formError.value = `You have reached the maximum limit of ${maxMedia} media player creations per day for your current plan. Please try again tomorrow or upgrade your plan.`;
+				return;
+			}
+		} catch (err) {
+			console.error("Failed to check daily limits", err);
+			formError.value =
+				"Failed to verify subscription limits. Please try again.";
+			return;
+		}
+	}
 
-  if (!currentUser.value) {
-    formError.value = "You must be logged in to create a player.";
-    return;
-  }
+	if (!currentUser.value) {
+		formError.value = "You must be logged in to create a player.";
+		return;
+	}
 
-  try {
-    const uaType =
-      selectedUaType.value === "random" ? null : selectedUaType.value;
-    const uaString = generateUserAgent(uaType);
+	try {
+		const uaType =
+			selectedUaType.value === "random" ? null : selectedUaType.value;
+		const uaString = generateUserAgent(uaType);
 
-    const doc = await databases.createDocument(
-      DB_ID,
-      collectionId,
-      ID.unique(),
-      {
-        youtubeUrls: urls,
-        userId: currentUser.value.$id,
-        currentQueue: 0,
-        proxyId: selectedProxyId.value || null,
-        userAgent: uaString,
-        isLooping: isLooping.value,
-        loopCount: loopCount.value || 0,
-        currentLoop: 0,
-      },
-    );
+		const doc = await databases.createDocument(
+			DB_ID,
+			collectionId,
+			ID.unique(),
+			{
+				youtubeUrls: urls,
+				userId: currentUser.value.$id,
+				currentQueue: 0,
+				proxyId: selectedProxyId.value || null,
+				userAgent: uaString,
+				isLooping: isLooping.value,
+				loopCount: loopCount.value || 0,
+				currentLoop: 0,
+			},
+		);
 
-    // Log the media creation
-    await databases.createDocument(DB_ID, "media_creation_logs", ID.unique(), {
-      userId: currentUser.value.$id,
-    });
+		// Log the media creation
+		await databases.createDocument(DB_ID, "media_creation_logs", ID.unique(), {
+			userId: currentUser.value.$id,
+		});
 
-    const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
+		const proxy = proxiesList.value.find((p) => p.id === doc.proxyId);
 
-    players.value.unshift({
-      id: doc.$id,
-      youtubeUrls: doc.youtubeUrls,
-      userId: doc.userId,
-      currentQueue: doc.currentQueue,
-      proxyId: doc.proxyId,
-      proxyIp: proxy ? proxy.ipAddress : null,
-      userAgent: doc.userAgent,
-      isLooping: doc.isLooping || false,
-      loopCount: doc.loopCount || 0,
-      currentLoop: doc.currentLoop || 0,
-    });
+		players.value.unshift({
+			id: doc.$id,
+			youtubeUrls: doc.youtubeUrls,
+			userId: doc.userId,
+			currentQueue: doc.currentQueue,
+			proxyId: doc.proxyId,
+			proxyIp: proxy ? proxy.ipAddress : null,
+			userAgent: doc.userAgent,
+			isLooping: doc.isLooping || false,
+			loopCount: doc.loopCount || 0,
+			currentLoop: doc.currentLoop || 0,
+		});
 
-    isModalVisible.value = false;
-    resetForm();
-  } catch (e) {
-    console.error(e);
-    formError.value = "Failed to save player. " + e.message;
-  }
+		isModalVisible.value = false;
+		resetForm();
+	} catch (e) {
+		console.error(e);
+		formError.value = "Failed to save player. " + e.message;
+	}
 };
 
 const stopPlayer = async (id) => {
-  try {
-    await databases.deleteDocument(DB_ID, collectionId, id);
-    players.value = players.value.filter((p) => p.id !== id);
-  } catch (e) {
-    console.error("Failed to delete player", e);
-  }
+	try {
+		await databases.deleteDocument(DB_ID, collectionId, id);
+		players.value = players.value.filter((p) => p.id !== id);
+	} catch (e) {
+		console.error("Failed to delete player", e);
+	}
 };
 
 const handleUpdateState = async (player, newState) => {
-  if (newState.currentQueue !== undefined)
-    player.currentQueue = newState.currentQueue;
-  if (newState.currentLoop !== undefined)
-    player.currentLoop = newState.currentLoop;
+	if (newState.currentQueue !== undefined)
+		player.currentQueue = newState.currentQueue;
+	if (newState.currentLoop !== undefined)
+		player.currentLoop = newState.currentLoop;
 
-  try {
-    const updatePayload = {};
-    if (newState.currentQueue !== undefined)
-      updatePayload.currentQueue = newState.currentQueue;
-    if (newState.currentLoop !== undefined)
-      updatePayload.currentLoop = newState.currentLoop;
+	try {
+		const updatePayload = {};
+		if (newState.currentQueue !== undefined)
+			updatePayload.currentQueue = newState.currentQueue;
+		if (newState.currentLoop !== undefined)
+			updatePayload.currentLoop = newState.currentLoop;
 
-    await databases.updateDocument(
-      DB_ID,
-      collectionId,
-      player.id,
-      updatePayload,
-    );
-  } catch (e) {
-    console.error("Failed to update player state", e);
-  }
+		await databases.updateDocument(
+			DB_ID,
+			collectionId,
+			player.id,
+			updatePayload,
+		);
+	} catch (e) {
+		console.error("Failed to update player state", e);
+	}
 };
 </script>
 
