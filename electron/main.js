@@ -84,6 +84,7 @@ function createWindow() {
 		minWidth: Math.floor(width / 2),
 		minHeight: 600,
 		icon: iconPath,
+		autoHideMenuBar: true,
 		webPreferences: {
 			preload: join(currentDir, "preload.js"),
 			webviewTag: true,
